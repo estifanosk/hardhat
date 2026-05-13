@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HardHat
+
+**Scan. Verify. Work Safe.**
+
+QR-based compliance verification for construction crews. Instantly verify worker certifications and equipment readiness on any job site.
+
+## Features
+
+- **Employee QR Scan** - Scan a worker's hard hat QR code to see certifications, licenses, and task training status
+- **Equipment Verification** - Check registration, insurance, and inspection status before operation
+- **Daily Inspections** - Mobile-friendly pre-use checklists with photo capture
+- **JHA Sign-off** - Digital Job Hazard Analysis forms with crew acknowledgment
+- **Compliance Dashboard** - Overview of expiring certs, today's inspections, and alerts
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/estifanosk/hardhat.git
+cd hardhat
+
+# Install dependencies
+npm install
+```
+
+### Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Demo Pages
 
-To learn more about Next.js, take a look at the following resources:
+| Page | URL | Description |
+|------|-----|-------------|
+| Landing | `/` | Product overview |
+| Dashboard | `/dashboard` | Compliance overview with stats |
+| Employee (expiring) | `/e/emp-abc123` | Worker with expiring certification |
+| Employee (compliant) | `/e/emp-def456` | Fully compliant worker |
+| Employee (non-compliant) | `/e/emp-ghi789` | Worker with expired certs |
+| Equipment (ready) | `/eq/eq-xyz001` | Equipment cleared for use |
+| Equipment (out of service) | `/eq/eq-xyz003` | Equipment with failed inspection |
+| Daily Checklist | `/eq/eq-xyz001/inspect` | Pre-use inspection form |
+| JHA Sign-off | `/jha/jha-001` | Job Hazard Analysis form |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Icons**: Lucide React
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── page.tsx              # Landing page
+│   ├── dashboard/            # Compliance dashboard
+│   ├── e/[qrCode]/           # Employee scan page
+│   ├── eq/[qrCode]/          # Equipment scan page
+│   │   └── inspect/          # Daily checklist form
+│   └── jha/[id]/             # JHA sign-off page
+├── components/ui/            # shadcn/ui components
+└── lib/
+    └── mock-data.ts          # Sample data for POC
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentation
+
+- [Product Spec](docs/hardhat_spec.md) - Full product requirements
+- [Design Doc](docs/DESIGN_DOC.md) - Technical architecture and implementation plan
+
+## License
+
+Private - All rights reserved
