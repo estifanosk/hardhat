@@ -124,7 +124,7 @@ export default async function EmployeeDetailPage({
             <div className="bg-gray-50 border rounded-lg p-3">
               <p className="font-mono text-sm text-gray-600">{employee.qr_code}</p>
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-3">
               <Link href={`/e/${employee.qr_code}`} target="_blank">
                 <Button variant="outline" size="sm" className="gap-1.5 w-full">
                   <ExternalLink className="h-3.5 w-3.5" />
