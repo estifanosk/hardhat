@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getEquipmentByQrCode } from '@/lib/mock-data';
+import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,11 +23,22 @@ interface PageProps {
 
 export default async function EquipmentScanPage({ params }: PageProps) {
   const { qrCode } = await params;
-  const equip = getEquipmentByQrCode(qrCode);
+  const supabase = await createClient();
 
-  if (!equip) {
-    notFound();
-  }
+  const { data: equip } = await supabase
+    .from('equipment')
+    .select(`
+      *,
+      equipment_documents(*),
+      inspections(id, inspector_name, inspection_date, inspection_time, status, notes)
+    `)
+    .eq('qr_code', qrCode)
+    .order('inspection_date', { referencedTable: 'inspections', ascending: false })
+    .single();
+
+  if (!equip) notFound();
+
+  const lastInspection = equip.inspections?.[0] ?? null;
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -96,7 +107,7 @@ export default async function EquipmentScanPage({ params }: PageProps) {
     }
   };
 
-  const statusConfig = getStatusConfig(equip.overallStatus);
+  const statusConfig = getStatusConfig(equip.overall_status);
   const StatusIcon = statusConfig.icon;
 
   const formatDate = (dateStr: string | null) => {
@@ -116,11 +127,13 @@ export default async function EquipmentScanPage({ params }: PageProps) {
           <CardContent className="pt-6">
             {/* Equipment Image */}
             <div className="w-full h-40 rounded-lg overflow-hidden mb-4 bg-gray-200">
-              <img
-                src={equip.photoUrl}
-                alt={equip.name}
-                className="w-full h-full object-cover"
-              />
+              {equip.photo_url && (
+                <img
+                  src={equip.photo_url}
+                  alt={equip.name}
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
 
             <div className="space-y-1">
@@ -155,7 +168,7 @@ export default async function EquipmentScanPage({ params }: PageProps) {
               Documents
             </h2>
             <div className="space-y-3">
-              {equip.documents.map((doc) => {
+              {(equip.equipment_documents ?? []).map((doc: { id: string; name: string; status: string; expiry_date: string | null }) => {
                 const docStatus = getDocStatusConfig(doc.status);
                 const DocIcon = docStatus.icon;
 
@@ -168,7 +181,7 @@ export default async function EquipmentScanPage({ params }: PageProps) {
                     <div className="flex-1">
                       <span className="font-medium text-gray-900">{doc.name}</span>
                       <p className="text-sm text-gray-500">
-                        Expires: {formatDate(doc.expiryDate)}
+                        Expires: {formatDate(doc.expiry_date)}
                       </p>
                     </div>
                   </div>
@@ -186,34 +199,34 @@ export default async function EquipmentScanPage({ params }: PageProps) {
               Last Inspection
             </h2>
 
-            {equip.lastInspection ? (
+            {lastInspection ? (
               <div
-                className={`p-4 rounded-lg ${getInspectionStatusConfig(equip.lastInspection.status).bg}`}
+                className={`p-4 rounded-lg ${getInspectionStatusConfig(lastInspection.status).bg}`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   {(() => {
-                    const config = getInspectionStatusConfig(equip.lastInspection.status);
+                    const config = getInspectionStatusConfig(lastInspection.status);
                     const InspIcon = config.icon;
                     return <InspIcon className={`h-5 w-5 ${config.color}`} />;
                   })()}
                   <span className="font-semibold capitalize">
-                    {equip.lastInspection.status.replace('_', ' ')}
+                    {lastInspection.status.replace('_', ' ')}
                   </span>
                   <span className="text-gray-500">-</span>
                   <span className="text-gray-600">
-                    {equip.lastInspection.date === new Date().toISOString().split('T')[0]
+                    {lastInspection.inspection_date === new Date().toISOString().split('T')[0]
                       ? 'Today'
-                      : equip.lastInspection.date}{' '}
-                    {equip.lastInspection.time}
+                      : lastInspection.inspection_date}{' '}
+                    {lastInspection.inspection_time ?? ''}
                   </span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  By: {equip.lastInspection.inspectorName}
+                  By: {lastInspection.inspector_name}
                 </p>
-                {equip.lastInspection.notes && (
+                {lastInspection.notes && (
                   <p className="text-sm text-gray-700 mt-2 p-2 bg-white/50 rounded">
                     <Wrench className="h-4 w-4 inline mr-1" />
-                    {equip.lastInspection.notes}
+                    {lastInspection.notes}
                   </p>
                 )}
               </div>

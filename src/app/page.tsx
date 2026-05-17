@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   HardHat,
   QrCode,
@@ -33,13 +32,15 @@ export default function HomePage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/dashboard">
             <Button size="lg" className="w-full sm:w-auto text-lg px-8 h-14">
-              View Demo Dashboard
+              Go to Dashboard
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
-          <Badge variant="outline" className="self-center text-sm py-2 px-4">
-            Interactive POC
-          </Badge>
+          <Link href="/login">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 h-14">
+              Admin Login
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -202,11 +203,11 @@ export default function HomePage() {
           Ready to see it in action?
         </h2>
         <p className="text-gray-600 mb-6">
-          Explore the interactive demo with sample employees and equipment.
+          Manage your crew certifications, equipment, and job site compliance in one place.
         </p>
-        <Link href="/dashboard">
+        <Link href="/login">
           <Button size="lg" className="text-lg px-8 h-14">
-            Open Dashboard Demo
+            Get Started
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </Link>
@@ -216,7 +217,7 @@ export default function HomePage() {
       <footer className="border-t py-8">
         <div className="max-w-4xl mx-auto px-4 text-center text-sm text-gray-500">
           <p>HardHat - Construction Compliance Made Simple</p>
-          <p className="mt-1">Interactive POC with mock data</p>
+          <p className="mt-1">Built for construction teams that take safety seriously</p>
         </div>
       </footer>
     </div>
