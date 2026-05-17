@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getEmployeeByQrCode } from '@/lib/mock-data';
+import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,11 +12,15 @@ interface PageProps {
 
 export default async function EmployeeScanPage({ params }: PageProps) {
   const { qrCode } = await params;
-  const employee = getEmployeeByQrCode(qrCode);
+  const supabase = await createClient();
 
-  if (!employee) {
-    notFound();
-  }
+  const { data: employee } = await supabase
+    .from('employees')
+    .select('*, certifications(*)')
+    .eq('qr_code', qrCode)
+    .single();
+
+  if (!employee) notFound();
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -85,11 +89,15 @@ export default async function EmployeeScanPage({ params }: PageProps) {
     }
   };
 
-  const statusConfig = getStatusConfig(employee.overallStatus);
+  const statusConfig = getStatusConfig(employee.overall_status);
   const StatusIcon = statusConfig.icon;
 
-  const certifications = employee.certifications.filter((c) => c.type !== 'task_training');
-  const taskTraining = employee.certifications.filter((c) => c.type === 'task_training');
+  const certifications = (employee.certifications ?? []).filter(
+    (c: { type: string }) => c.type !== 'task_training'
+  );
+  const taskTraining = (employee.certifications ?? []).filter(
+    (c: { type: string }) => c.type === 'task_training'
+  );
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'No expiry';
@@ -116,11 +124,11 @@ export default async function EmployeeScanPage({ params }: PageProps) {
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={employee.photoUrl} alt={employee.name} />
+                <AvatarImage src={employee.photo_url ?? undefined} alt={employee.name} />
                 <AvatarFallback className="text-xl">
                   {employee.name
                     .split(' ')
-                    .map((n) => n[0])
+                    .map((n: string) => n[0])
                     .join('')}
                 </AvatarFallback>
               </Avatar>
@@ -151,11 +159,11 @@ export default async function EmployeeScanPage({ params }: PageProps) {
               Certifications & Licenses
             </h2>
             <div className="space-y-3">
-              {certifications.map((cert) => {
+              {certifications.map((cert: { id: string; name: string; type: string; status: string; expiry_date: string | null }) => {
                 const certStatus = getCertStatusConfig(cert.status);
                 const CertIcon = certStatus.icon;
                 const TypeIcon = getTypeIcon(cert.type);
-                const daysUntil = getDaysUntilExpiry(cert.expiryDate);
+                const daysUntil = getDaysUntilExpiry(cert.expiry_date);
 
                 return (
                   <div
@@ -172,7 +180,7 @@ export default async function EmployeeScanPage({ params }: PageProps) {
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-500">
-                        Expires: {formatDate(cert.expiryDate)}
+                        Expires: {formatDate(cert.expiry_date)}
                       </p>
                       {daysUntil !== null && daysUntil <= 30 && daysUntil > 0 && (
                         <p className="text-sm text-yellow-600 font-medium">
@@ -201,7 +209,7 @@ export default async function EmployeeScanPage({ params }: PageProps) {
                 Task Training
               </h2>
               <div className="flex flex-wrap gap-2">
-                {taskTraining.map((training) => (
+                {taskTraining.map((training: { id: string; name: string }) => (
                   <Badge
                     key={training.id}
                     variant="secondary"

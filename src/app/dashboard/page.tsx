@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { dashboardStats, employees, equipment, jhaForms } from '@/lib/mock-data';
+import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,59 +18,84 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-export default function DashboardPage() {
-  // Get expiring items
-  const expiringCerts = employees.flatMap((emp) =>
-    emp.certifications
-      .filter((c) => c.status === 'expiring_soon' || c.status === 'expired')
-      .map((c) => ({
-        type: 'employee' as const,
-        name: emp.name,
-        item: c.name,
-        status: c.status,
-        expiryDate: c.expiryDate,
-      }))
-  );
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const today = new Date().toISOString().split('T')[0];
 
-  const expiringDocs = equipment.flatMap((eq) =>
-    eq.documents
-      .filter((d) => d.status === 'expiring_soon' || d.status === 'expired')
-      .map((d) => ({
-        type: 'equipment' as const,
-        name: eq.identifier,
-        item: d.name,
-        status: d.status,
-        expiryDate: d.expiryDate,
-      }))
-  );
+  const [
+    { count: totalEmployees },
+    { count: totalEquipment },
+    { data: expiringCerts },
+    { data: expiringDocs },
+    { data: todayInspections },
+  ] = await Promise.all([
+    supabase.from('employees').select('*', { count: 'exact', head: true }),
+    supabase.from('equipment').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('certifications')
+      .select('name, status, expiry_date, employees(name)')
+      .in('status', ['expiring_soon', 'expired'])
+      .order('expiry_date', { ascending: true })
+      .limit(10),
+    supabase
+      .from('equipment_documents')
+      .select('name, status, expiry_date, equipment(identifier)')
+      .in('status', ['expiring_soon', 'expired'])
+      .order('expiry_date', { ascending: true })
+      .limit(10),
+    supabase
+      .from('inspections')
+      .select('id, status, equipment(id, name, identifier, qr_code)')
+      .eq('inspection_date', today)
+      .order('created_at', { ascending: false }),
+  ]);
 
-  const allExpiring = [...expiringCerts, ...expiringDocs].sort((a, b) => {
+  const getDaysUntilExpiry = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    return Math.ceil((new Date(dateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  };
+
+  type ExpiringItem = {
+    name: string;
+    status: string;
+    expiry_date: string | null;
+    ownerName: string;
+    type: 'employee' | 'equipment';
+  };
+
+  const allExpiring: ExpiringItem[] = [
+    ...(expiringCerts ?? []).map((c) => ({
+      name: c.name,
+      status: c.status,
+      expiry_date: c.expiry_date,
+      ownerName: (c.employees as unknown as { name: string } | null)?.name ?? '—',
+      type: 'employee' as const,
+    })),
+    ...(expiringDocs ?? []).map((d) => ({
+      name: d.name,
+      status: d.status,
+      expiry_date: d.expiry_date,
+      ownerName: (d.equipment as unknown as { identifier: string } | null)?.identifier ?? '—',
+      type: 'equipment' as const,
+    })),
+  ].sort((a, b) => {
     if (a.status === 'expired' && b.status !== 'expired') return -1;
     if (b.status === 'expired' && a.status !== 'expired') return 1;
     return 0;
   });
 
-  // Get today's inspections
-  const todayInspections = equipment.map((eq) => ({
-    equipment: eq,
-    status: eq.lastInspection
-      ? eq.lastInspection.date === new Date().toISOString().split('T')[0]
-        ? eq.lastInspection.status
-        : 'pending'
-      : 'pending',
-    inspection: eq.lastInspection,
-  }));
+  const expiringCount = allExpiring.filter((i) => i.status === 'expiring_soon').length;
+  const expiredCount = allExpiring.filter((i) => i.status === 'expired').length;
 
-  const getDaysUntilExpiry = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    const expiry = new Date(dateStr);
-    const today = new Date();
-    return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  type InspectedEquipment = {
+    id: string;
+    name: string;
+    identifier: string;
+    qr_code: string;
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -80,69 +105,60 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">HardHat</h1>
-                <p className="text-xs text-gray-500">ABC Construction</p>
+                <p className="text-xs text-gray-500">Dashboard</p>
               </div>
             </div>
-            <Badge variant="outline" className="text-xs">
-              POC Demo
-            </Badge>
+            <Link href="/admin/employees">
+              <Badge variant="outline" className="text-xs cursor-pointer hover:bg-gray-50">
+                Admin →
+              </Badge>
+            </Link>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* Stats Grid */}
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Employees</p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {dashboardStats.totalEmployees}
-                  </p>
+                  <p className="text-3xl font-bold text-gray-900">{totalEmployees ?? 0}</p>
                 </div>
                 <Users className="h-10 w-10 text-blue-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Equipment</p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {dashboardStats.totalEquipment}
-                  </p>
+                  <p className="text-3xl font-bold text-gray-900">{totalEquipment ?? 0}</p>
                 </div>
                 <Truck className="h-10 w-10 text-green-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Expiring Soon</p>
-                  <p className="text-3xl font-bold text-yellow-600">
-                    {dashboardStats.expiringItems}
-                  </p>
+                  <p className="text-3xl font-bold text-yellow-600">{expiringCount}</p>
                 </div>
                 <AlertTriangle className="h-10 w-10 text-yellow-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Expired</p>
-                  <p className="text-3xl font-bold text-red-600">
-                    {dashboardStats.expiredItems}
-                  </p>
+                  <p className="text-3xl font-bold text-red-600">{expiredCount}</p>
                 </div>
                 <XCircle className="h-10 w-10 text-red-500 opacity-50" />
               </div>
@@ -160,43 +176,44 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {allExpiring.slice(0, 5).map((item, idx) => {
-                  const days = getDaysUntilExpiry(item.expiryDate);
-                  return (
-                    <div
-                      key={idx}
-                      className={`flex items-center justify-between p-3 rounded-lg ${
-                        item.status === 'expired' ? 'bg-red-50' : 'bg-yellow-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        {item.status === 'expired' ? (
-                          <XCircle className="h-5 w-5 text-red-500" />
-                        ) : (
-                          <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                        )}
-                        <div>
-                          <p className="font-medium text-gray-900">{item.name}</p>
-                          <p className="text-sm text-gray-500">{item.item}</p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant={item.status === 'expired' ? 'destructive' : 'outline'}
-                        className={
-                          item.status === 'expired'
-                            ? ''
-                            : 'bg-yellow-100 text-yellow-700 border-yellow-200'
-                        }
+              {allExpiring.length === 0 ? (
+                <div className="flex items-center gap-2 text-green-600 py-2">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <span className="text-sm font-medium">All certifications and documents are current</span>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {allExpiring.slice(0, 5).map((item, idx) => {
+                    const days = getDaysUntilExpiry(item.expiry_date);
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex items-center justify-between p-3 rounded-lg ${item.status === 'expired' ? 'bg-red-50' : 'bg-yellow-50'}`}
                       >
-                        {item.status === 'expired'
-                          ? `Expired ${Math.abs(days || 0)}d ago`
-                          : `${days}d left`}
-                      </Badge>
-                    </div>
-                  );
-                })}
-              </div>
+                        <div className="flex items-center gap-3">
+                          {item.status === 'expired' ? (
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          ) : (
+                            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                          )}
+                          <div>
+                            <p className="font-medium text-gray-900">{item.ownerName}</p>
+                            <p className="text-sm text-gray-500">{item.name}</p>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={item.status === 'expired' ? 'destructive' : 'outline'}
+                          className={item.status !== 'expired' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : ''}
+                        >
+                          {item.status === 'expired'
+                            ? `Expired ${Math.abs(days ?? 0)}d ago`
+                            : `${days}d left`}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -206,59 +223,48 @@ export default function DashboardPage() {
               <CardTitle className="text-base flex items-center gap-2">
                 <ClipboardCheck className="h-5 w-5" />
                 Today&apos;s Inspections
+                <span className="text-sm font-normal text-gray-400">({todayInspections?.length ?? 0})</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {todayInspections.map((item) => (
-                  <Link
-                    key={item.equipment.id}
-                    href={`/eq/${item.equipment.qrCode}`}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      {item.status === 'passed' ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      ) : item.status === 'failed' ? (
-                        <XCircle className="h-5 w-5 text-red-500" />
-                      ) : (
-                        <Clock className="h-5 w-5 text-gray-400" />
-                      )}
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {item.equipment.identifier}
-                        </p>
-                        <p className="text-sm text-gray-500">{item.equipment.name}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {item.status === 'passed' && item.inspection && (
-                        <span className="text-sm text-gray-500">
-                          {item.inspection.time}
-                        </span>
-                      )}
-                      <Badge
-                        variant={
-                          item.status === 'passed'
-                            ? 'default'
-                            : item.status === 'failed'
-                              ? 'destructive'
-                              : 'outline'
-                        }
-                        className={
-                          item.status === 'passed'
-                            ? 'bg-green-100 text-green-700'
-                            : item.status === 'pending'
-                              ? 'bg-gray-100 text-gray-600'
-                              : ''
-                        }
+              {!todayInspections || todayInspections.length === 0 ? (
+                <div className="flex items-center gap-2 text-gray-400 py-2">
+                  <Clock className="h-5 w-5" />
+                  <span className="text-sm">No inspections recorded today</span>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {todayInspections.map((insp) => {
+                    const eq = insp.equipment as unknown as InspectedEquipment | null;
+                    if (!eq) return null;
+                    return (
+                      <Link
+                        key={insp.id}
+                        href={`/eq/${eq.qr_code}`}
+                        className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       >
-                        {item.status === 'pending' ? 'Not inspected' : item.status}
-                      </Badge>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                        <div className="flex items-center gap-3">
+                          {insp.status === 'passed' ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          )}
+                          <div>
+                            <p className="font-medium text-gray-900">{eq.identifier}</p>
+                            <p className="text-sm text-gray-500">{eq.name}</p>
+                          </div>
+                        </div>
+                        <Badge
+                          className={insp.status === 'passed' ? 'bg-green-100 text-green-700' : ''}
+                          variant={insp.status === 'failed' ? 'destructive' : 'default'}
+                        >
+                          {insp.status}
+                        </Badge>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -266,81 +272,52 @@ export default function DashboardPage() {
         {/* Quick Links */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Demo Pages</CardTitle>
+            <CardTitle className="text-base">Quick Links</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
-              <Link href="/e/emp-abc123">
+              <Link href="/admin/employees">
                 <Button variant="outline" className="w-full justify-between h-auto py-3">
                   <div className="flex items-center gap-2">
-                    <QrCode className="h-4 w-4" />
-                    <span>Employee Scan</span>
+                    <Users className="h-4 w-4" />
+                    <span>Manage Employees</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
-
-              <Link href="/eq/eq-xyz001">
+              <Link href="/admin/equipment">
                 <Button variant="outline" className="w-full justify-between h-auto py-3">
                   <div className="flex items-center gap-2">
                     <Truck className="h-4 w-4" />
-                    <span>Equipment Scan</span>
+                    <span>Manage Equipment</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
-
-              <Link href="/eq/eq-xyz001/inspect">
+              <Link href="/admin/employees/new">
                 <Button variant="outline" className="w-full justify-between h-auto py-3">
                   <div className="flex items-center gap-2">
-                    <ClipboardCheck className="h-4 w-4" />
-                    <span>Daily Checklist</span>
+                    <QrCode className="h-4 w-4" />
+                    <span>Add Employee</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
-
-              <Link href="/jha/jha-001">
+              <Link href="/admin/equipment/new">
                 <Button variant="outline" className="w-full justify-between h-auto py-3">
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />
-                    <span>JHA Sign-off</span>
+                    <span>Add Equipment</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
-            </div>
-
-            <Separator className="my-4" />
-
-            <div className="text-sm text-gray-500">
-              <p className="font-medium mb-2">Sample QR Codes (for testing):</p>
-              <div className="grid sm:grid-cols-2 gap-2 text-xs font-mono">
-                <div>
-                  <span className="text-gray-400">Compliant Employee:</span>{' '}
-                  <code className="bg-gray-100 px-1 rounded">/e/emp-def456</code>
-                </div>
-                <div>
-                  <span className="text-gray-400">Expiring Employee:</span>{' '}
-                  <code className="bg-gray-100 px-1 rounded">/e/emp-abc123</code>
-                </div>
-                <div>
-                  <span className="text-gray-400">Non-Compliant:</span>{' '}
-                  <code className="bg-gray-100 px-1 rounded">/e/emp-ghi789</code>
-                </div>
-                <div>
-                  <span className="text-gray-400">Out of Service Equip:</span>{' '}
-                  <code className="bg-gray-100 px-1 rounded">/eq/eq-xyz003</code>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Footer */}
         <div className="text-center text-xs text-gray-400 pt-4 pb-8">
-          <p>HardHat POC - Scan. Verify. Work Safe.</p>
-          <p className="mt-1">This is a demo with mock data</p>
+          <p>HardHat — Scan. Verify. Work Safe.</p>
         </div>
       </main>
     </div>
