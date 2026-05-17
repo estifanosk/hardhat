@@ -227,7 +227,10 @@ export default async function EmployeeScanPage({ params }: PageProps) {
         {/* Footer */}
         <div className="text-center text-xs text-gray-400 pt-2">
           <p>Last updated: {new Date().toLocaleDateString()}</p>
-          <p className="mt-1">Powered by HardHat</p>
+          <p className="mt-1">
+            Powered by HardHat ·{' '}
+            <a href="/help" className="underline hover:text-gray-600">Help</a>
+          </p>
         </div>
       </div>
     </div>

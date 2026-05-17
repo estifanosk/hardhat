@@ -28,15 +28,19 @@ export default function NewEmployeePage() {
             <div className="space-y-1.5">
               <Label htmlFor="name">Full name</Label>
               <Input id="name" name="name" placeholder="John Smith" required />
+              <p className="text-xs text-gray-400">As it appears on their ID or certification documents.</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="role">Job title / role</Label>
               <Input id="role" name="role" placeholder="Crane Operator" required />
+              <p className="text-xs text-gray-400">e.g. Crane Operator, Electrician, Site Supervisor.</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="company">Company</Label>
               <Input id="company" name="company" placeholder="ABC Construction" required />
+              <p className="text-xs text-gray-400">The subcontractor or employer this worker belongs to.</p>
             </div>
+            <p className="text-xs text-gray-400 pt-1">A unique QR code is generated automatically. You can add certifications after creating the employee.</p>
             <div className="pt-2 flex gap-3">
               <Button type="submit" className="flex-1">Create employee</Button>
               <Link href="/admin/employees">

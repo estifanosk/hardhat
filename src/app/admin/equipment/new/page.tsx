@@ -30,6 +30,7 @@ export default function NewEquipmentPage() {
             <div className="space-y-1.5">
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" placeholder="CAT 320 Excavator" required />
+              <p className="text-xs text-gray-400">Make and model, e.g. CAT 320 Excavator.</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="type">Type</Label>
@@ -48,11 +49,14 @@ export default function NewEquipmentPage() {
             <div className="space-y-1.5">
               <Label htmlFor="identifier">Unit ID</Label>
               <Input id="identifier" name="identifier" placeholder="EQ-042" required />
+              <p className="text-xs text-gray-400">Your internal unit number or serial number used to identify this equipment.</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="site">Job site</Label>
               <Input id="site" name="site" placeholder="Downtown Tower Project" required />
+              <p className="text-xs text-gray-400">The current job site where this equipment is deployed.</p>
             </div>
+            <p className="text-xs text-gray-400 pt-1">A unique QR code is generated automatically. You can add documents and run inspections after creating the equipment.</p>
             <div className="pt-2 flex gap-3">
               <Button type="submit" className="flex-1">Create equipment</Button>
               <Link href="/admin/equipment">

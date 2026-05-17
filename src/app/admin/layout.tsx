@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { logout } from '@/app/login/actions';
-import { HardHat, Users, Truck, LogOut } from 'lucide-react';
+import { HardHat, Users, Truck, LogOut, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -53,6 +53,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               >
                 <Truck className="h-4 w-4" />
                 Equipment
+              </Link>
+              <Link
+                href="/help"
+                className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 font-medium"
+              >
+                <HelpCircle className="h-4 w-4" />
+                Help
               </Link>
             </nav>
           </div>
