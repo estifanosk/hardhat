@@ -61,13 +61,6 @@ export default function HomePage() {
                     Scan a worker&apos;s hard hat QR code to instantly see their
                     certifications, licenses, and task training status.
                   </p>
-                  <Link
-                    href="/e/emp-abc123"
-                    className="inline-flex items-center text-blue-600 mt-3 text-sm font-medium hover:underline"
-                  >
-                    Try employee scan
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
                 </div>
               </div>
             </CardContent>
@@ -87,13 +80,6 @@ export default function HomePage() {
                     Scan equipment QR codes to check registration, insurance, and
                     inspection status before operation.
                   </p>
-                  <Link
-                    href="/eq/eq-xyz001"
-                    className="inline-flex items-center text-green-600 mt-3 text-sm font-medium hover:underline"
-                  >
-                    Try equipment scan
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
                 </div>
               </div>
             </CardContent>
@@ -113,13 +99,6 @@ export default function HomePage() {
                     Mobile-friendly pre-use checklists with photo capture. Flag issues
                     and notify maintenance in real-time.
                   </p>
-                  <Link
-                    href="/eq/eq-xyz001/inspect"
-                    className="inline-flex items-center text-purple-600 mt-3 text-sm font-medium hover:underline"
-                  >
-                    Try daily checklist
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
                 </div>
               </div>
             </CardContent>
@@ -139,13 +118,6 @@ export default function HomePage() {
                     Digital Job Hazard Analysis forms with crew acknowledgment. Track
                     safety meetings and hazard awareness.
                   </p>
-                  <Link
-                    href="/jha/jha-001"
-                    className="inline-flex items-center text-orange-600 mt-3 text-sm font-medium hover:underline"
-                  >
-                    Try JHA form
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
                 </div>
               </div>
             </CardContent>
