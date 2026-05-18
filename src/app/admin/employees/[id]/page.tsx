@@ -5,6 +5,7 @@ import {
   deleteEmployee,
   addCertification,
   deleteCertification,
+  linkProfile,
 } from '../actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,6 +23,7 @@ import {
   AlertTriangle,
   XCircle,
   ExternalLink,
+  UserCheck,
 } from 'lucide-react';
 
 const certTypeLabels: Record<string, string> = {
@@ -64,6 +66,13 @@ export default async function EmployeeDetailPage({
   const updateWithId = updateEmployee.bind(null, id);
   const deleteWithId = deleteEmployee.bind(null, id);
   const addCertWithId = addCertification.bind(null, id);
+  const linkProfileWithId = linkProfile.bind(null, id);
+
+  const { data: employeeProfiles } = await supabase
+    .from('profiles')
+    .select('id, full_name, email')
+    .eq('role', 'employee')
+    .order('full_name');
 
   const qrUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ? '' : 'http://localhost:3000'}/e/${employee.qr_code}`;
 
@@ -139,6 +148,42 @@ export default async function EmployeeDetailPage({
               </Link>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Link account */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <UserCheck className="h-4 w-4" />
+            Linked account
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-gray-500">
+            Link this employee to a HardHat login so they can view their certifications and receive expiry alerts.
+          </p>
+          <form action={linkProfileWithId} className="flex gap-2">
+            <select
+              name="profile_id"
+              className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm"
+              defaultValue={(employee as { profile_id?: string }).profile_id ?? ''}
+            >
+              <option value="">— No account linked —</option>
+              {(employeeProfiles ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.full_name || p.email}
+                </option>
+              ))}
+            </select>
+            <Button type="submit" size="sm">Save</Button>
+          </form>
+          {(employee as { profile_id?: string }).profile_id && (
+            <p className="text-xs text-green-600 flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Account linked — employee will receive expiry alerts by email.
+            </p>
+          )}
         </CardContent>
       </Card>
 
