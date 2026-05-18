@@ -177,7 +177,7 @@ export default async function UsersPage({
                         <select
                           name="role"
                           defaultValue={u.role}
-                          onChange="this.form.requestSubmit()"
+                          onChange={(e) => e.currentTarget.form?.requestSubmit()}
                           className="h-7 rounded-md border border-input bg-background px-2 text-xs"
                         >
                           {ROLES.map((r) => (
