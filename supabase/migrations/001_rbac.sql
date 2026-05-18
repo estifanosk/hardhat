@@ -7,14 +7,15 @@
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS site TEXT;
 
--- 2. Migrate existing data BEFORE changing the constraint
-UPDATE public.profiles SET role = 'super_admin' WHERE role = 'admin';
-UPDATE public.profiles SET role = 'viewer' WHERE role NOT IN ('super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer');
-
--- 3. Now safe to swap the constraint
+-- 2. Drop constraint first so existing data can't block updates
 ALTER TABLE public.profiles
   DROP CONSTRAINT IF EXISTS profiles_role_check;
 
+-- 3. Migrate existing data
+UPDATE public.profiles SET role = 'super_admin' WHERE role = 'admin';
+UPDATE public.profiles SET role = 'viewer' WHERE role NOT IN ('super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer');
+
+-- 4. Add new constraint
 ALTER TABLE public.profiles
   ADD CONSTRAINT profiles_role_check
   CHECK (role IN ('super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer'));
