@@ -7,16 +7,17 @@
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS site TEXT;
 
--- 2. Update role constraint to include all roles
+-- 2. Migrate existing data BEFORE changing the constraint
+UPDATE public.profiles SET role = 'super_admin' WHERE role = 'admin';
+UPDATE public.profiles SET role = 'viewer' WHERE role NOT IN ('super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer');
+
+-- 3. Now safe to swap the constraint
 ALTER TABLE public.profiles
   DROP CONSTRAINT IF EXISTS profiles_role_check;
 
 ALTER TABLE public.profiles
   ADD CONSTRAINT profiles_role_check
   CHECK (role IN ('super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer'));
-
--- 3. Migrate existing 'admin' users to 'super_admin'
-UPDATE public.profiles SET role = 'super_admin' WHERE role = 'admin';
 
 -- Update default role for new signups
 ALTER TABLE public.profiles
