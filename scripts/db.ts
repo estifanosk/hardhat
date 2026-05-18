@@ -50,24 +50,28 @@ if (!fs.existsSync(resolved)) {
 const sql = fs.readFileSync(resolved, 'utf-8');
 console.log(`▶  Running ${path.basename(resolved)} ...`);
 
-const res = await fetch(
-  `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
-  {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${ACCESS_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query: sql }),
+async function run() {
+  const res = await fetch(
+    `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: sql }),
+    }
+  );
+
+  const body = await res.json();
+
+  if (!res.ok) {
+    console.error('❌  Migration failed:');
+    console.error(JSON.stringify(body, null, 2));
+    process.exit(1);
   }
-);
 
-const body = await res.json();
-
-if (!res.ok) {
-  console.error('❌  Migration failed:');
-  console.error(JSON.stringify(body, null, 2));
-  process.exit(1);
+  console.log('✅  Migration applied successfully.');
 }
 
-console.log('✅  Migration applied successfully.');
+run();
