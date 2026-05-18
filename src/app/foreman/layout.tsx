@@ -45,7 +45,7 @@ export default async function ForemanLayout({ children }: { children: React.Reac
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500 hidden sm:block">
-              {profile.full_name || profile.email}
+              {profile?.full_name || profile?.email}
             </span>
             <form action={logout}>
               <Button variant="ghost" size="sm" type="submit" className="gap-1.5">
