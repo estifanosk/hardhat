@@ -53,11 +53,59 @@ A web + mobile platform for construction companies to manage workforce certifica
 - Archive and search by date/site/crew for audits.
 
 ### F. Role-Based Access Control (RBAC)
-- Employee: view/update own profile docs (approval workflow).
-- Mechanic: update maintenance/repair logs.
-- Supervisor: view team records, approve inspections.
-- Safety/Admin: full compliance dashboards and settings.
-- Super Admin: cross-company/global management (multi-tenant).
+
+#### Background
+Construction companies require workers to carry multiple certifications, licenses, and task training records at all times. Foremen and safety inspectors need to verify compliance instantly in the field. Admins in the office must organize, track, and renew records across entire crews and equipment fleets. Different people in the organization need different levels of access to do their jobs without exposing data they shouldn't see.
+
+#### Roles
+
+| Role | Who They Are |
+|------|-------------|
+| `super_admin` | Office staff — full control over all employees, equipment, users, and settings |
+| `safety_admin` | Safety department — manages certifications and compliance, receives all alerts |
+| `foreman` | Job site lead — verifies crew compliance, runs inspections, submits JHAs |
+| `employee` | Worker — manages their own profile and certifications, submits inspections, signs JHAs |
+| `mechanic` | Maintenance tech — manages equipment logs and maintenance records only |
+| `inspector` | External auditor — read-only via QR scan, no login required |
+
+#### Permissions Matrix
+
+| Action | super_admin | safety_admin | foreman | employee | mechanic |
+|--------|-------------|--------------|---------|----------|----------|
+| Manage all users & roles | ✅ | ❌ | ❌ | ❌ | ❌ |
+| View all employees | ✅ | ✅ | ✅ (own site) | ❌ | ❌ |
+| Create / edit / delete employees | ✅ | ✅ | ❌ | ❌ | ❌ |
+| View own profile | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Edit own profile & certs | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Add certs to other employees | ✅ | ✅ | ❌ | ❌ | ❌ |
+| View all equipment | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Create / edit / delete equipment | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Run daily inspections | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Add maintenance logs | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Submit / view JHAs | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Receive expiry alerts | ✅ | ✅ | ❌ | ✅ (own) | ❌ |
+| Export / download data | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Manage company settings | ✅ | ❌ | ❌ | ❌ | ❌ |
+
+#### Key Design Decisions
+
+- **Employees get logins** so they can upload their own cert documents from their phone and keep their profile up to date — but they only see themselves, not other workers.
+- **Foremen are scoped to their job site** — they see the crew at their site, not the entire company roster.
+- **Mechanics are separate from employees** — they have write access to equipment records but cannot view or touch employee data.
+- **External inspectors never log in** — the QR scan page is fully public. No friction, no account required. Anyone with the URL (e.g., OSHA inspector, insurance auditor) can view compliance status.
+- **Expiry alerts go to**: the employee themselves + safety_admin + super_admin.
+- **Employee-uploaded certs** require safety_admin or super_admin approval before becoming active (approval workflow).
+
+#### Notification Targets by Event
+
+| Event | Notified |
+|-------|----------|
+| Cert expiring in 30 days | employee + safety_admin + super_admin |
+| Cert expiring in 7 days | employee + safety_admin + super_admin |
+| Cert expired | employee + safety_admin + super_admin |
+| Equipment doc expiring | safety_admin + super_admin |
+| Inspection failed | foreman (site) + safety_admin |
+| Maintenance ticket created | mechanic + safety_admin |
 
 ### G. SaaS Billing
 - Subscription pricing by active employee and/or asset count.
