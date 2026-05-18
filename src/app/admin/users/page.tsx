@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus, Shield } from 'lucide-react';
+import { RoleSelectForm } from './RoleSelectForm';
 
 const ROLES = ['super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer'] as const;
 
@@ -169,25 +170,14 @@ export default async function UsersPage({
 
                     {/* Role change — not for self */}
                     {u.id !== user.id && !u.banned && (
-                      <form action={async (formData) => {
-                        'use server';
-                        const role = formData.get('role') as string;
-                        await updateRole(role as Parameters<typeof updateUserRole>[1]);
-                      }}>
-                        <select
-                          name="role"
-                          defaultValue={u.role}
-                          onChange={(e) => e.currentTarget.form?.requestSubmit()}
-                          className="h-7 rounded-md border border-input bg-background px-2 text-xs"
-                        >
-                          {ROLES.map((r) => (
-                            <option key={r} value={r}>{roleLabels[r]}</option>
-                          ))}
-                        </select>
-                        <button type="submit" className="text-xs text-blue-600 hover:underline ml-1">
-                          Save
-                        </button>
-                      </form>
+                      <RoleSelectForm
+                        currentRole={u.role}
+                        action={async (formData) => {
+                          'use server';
+                          const role = formData.get('role') as string;
+                          await updateRole(role as Parameters<typeof updateUserRole>[1]);
+                        }}
+                      />
                     )}
 
                     {/* Deactivate / reactivate — not for self */}
