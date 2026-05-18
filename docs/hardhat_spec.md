@@ -107,24 +107,70 @@ Construction companies require workers to carry multiple certifications, license
 | Inspection failed | foreman (site) + safety_admin |
 | Maintenance ticket created | mechanic + safety_admin |
 
-### G. SaaS Billing
+### G. Authentication (Passwordless)
+
+No user in HardHat should ever need a password. Field workers are outdoors, wearing gloves, and working under pressure — typing passwords on a phone is unacceptable UX. Office admins already have company Google or Microsoft accounts.
+
+#### Auth method by role
+
+| Role | Method | Rationale |
+|------|--------|-----------|
+| `super_admin` | Google / Microsoft OAuth | Company account, seamless SSO |
+| `safety_admin` | Google / Microsoft OAuth | Company account, seamless SSO |
+| `foreman` | Magic link (email) or Phone OTP | Field worker, picks preferred method |
+| `employee` | Magic link (email) or Phone OTP | Field worker, picks preferred method |
+| `mechanic` | Magic link (email) or Phone OTP | Field worker, picks preferred method |
+| `inspector` | No login — public QR scan page | No friction for external auditors |
+
+#### Magic link (email)
+User enters their email (personal or work) → receives a one-click sign-in link → taps it → logged in. No password ever set or required. Powered by Supabase Auth, free tier covers all usage.
+
+#### Phone OTP (SMS)
+User enters their phone number → receives a 6-digit SMS code → enters it → logged in. Best for workers without consistent email access. Requires Twilio integration via Supabase. **Planned for Phase 2** once SMS costs are covered by subscription revenue.
+
+#### Login page UX (field workers)
+```
+┌─────────────────────────────┐
+│  Sign in to HardHat         │
+│                             │
+│  Email                      │
+│  [you@example.com        ]  │
+│  [Send magic link        ]  │
+│                             │
+│  ──────── or ────────       │
+│                             │
+│  Phone                      │
+│  [+1 (555) 000-0000      ]  │
+│  [Send code              ]  │
+└─────────────────────────────┘
+```
+
+#### Invite flow
+Admins invite users from the User Management page by entering their email or phone. Supabase sends the invite — the user clicks the link and their account is activated with the role the admin assigned. No password setup step.
+
+#### Implementation phases
+- **Phase 1 (now)**: Magic link via email for all roles
+- **Phase 2**: Add phone OTP option for foreman / employee / mechanic
+- **Future**: Google/Microsoft OAuth for admin roles
+
+### I. SaaS Billing
 - Subscription pricing by active employee and/or asset count.
 - Monthly billing cycles, plan tiers, usage dashboard.
 - Admin billing portal and invoicing.
 
-### H. Admin Configuration (NEW)
+### J. Admin Configuration (NEW)
 - **Checklist Template Builder**: Admins can create, edit, and assign pre-use inspection checklists per equipment type or job site.
 - **JHA Form Customization**: Configurable hazard categories and task fields per company/site requirements.
 - **Approval Workflow Settings**: Define whether employee-uploaded certs require manager approval before activation.
 - **Notification Preferences**: Company-level defaults for alert timing and escalation rules.
 
-### I. External Auditor Access (NEW)
+### K. External Auditor Access (NEW)
 - **Guest Access Links**: Generate time-limited, read-only links for external inspectors (e.g., OSHA, insurance auditors).
 - **Scope Control**: Limit guest access to specific employees, crews, sites, or date ranges.
 - **Access Logging**: Track all external access for compliance audit trail.
 - **No Account Required**: External parties view via secure link without creating login.
 
-### J. Data Import & Onboarding (NEW)
+### L. Data Import & Onboarding (NEW)
 - **Bulk CSV Import**: Upload employee rosters, certifications, and equipment inventories during initial setup.
 - **Template Downloads**: Provide standardized CSV templates for each data type.
 - **Validation & Error Reporting**: Preview imports, flag errors (missing fields, invalid dates), allow corrections before commit.
