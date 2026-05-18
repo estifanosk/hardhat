@@ -1,14 +1,23 @@
 /**
  * Run a SQL migration file against Supabase.
  *
- * Usage:
- *   npm run db <path-to-sql-file>
- *   npm run db supabase/migrations/001_rbac.sql
+ * ─── SETUP (one time) ────────────────────────────────────────────────────────
  *
- * Requires SUPABASE_ACCESS_TOKEN in your environment:
- *   export SUPABASE_ACCESS_TOKEN=your_token_here
+ *  1. Get your access token:
+ *     - Go to https://supabase.com/dashboard
+ *     - Click your avatar (top-right) → Access Tokens
+ *     - Click "Generate new token", name it (e.g. "hardhat-cli"), copy it
  *
- * Get your token: supabase.com/dashboard → top-right avatar → Access Tokens
+ *  2. Set it in your terminal:
+ *     export SUPABASE_ACCESS_TOKEN=your_token_here
+ *
+ *     Tip: add that line to your ~/.zshrc so you don't have to repeat it.
+ *
+ * ─── USAGE ───────────────────────────────────────────────────────────────────
+ *
+ *  npm run db supabase/migrations/001_rbac.sql
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import * as fs from 'fs';
