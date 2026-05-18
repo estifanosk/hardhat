@@ -1,6 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const ROLE_HOME: Record<string, string> = {
+  super_admin: '/admin/employees',
+  safety_admin: '/admin/employees',
+  foreman: '/foreman',
+  employee: '/employee',
+  mechanic: '/mechanic',
+};
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -23,23 +31,35 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session — do not remove this
   const { data: { user } } = await supabase.auth.getUser();
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
-  const isLoginPage = request.nextUrl.pathname === '/login';
+  const path = request.nextUrl.pathname;
+  const isLoginPage = path === '/login';
+  const isProtectedRoute =
+    path.startsWith('/admin') ||
+    path.startsWith('/foreman') ||
+    path.startsWith('/employee') ||
+    path.startsWith('/mechanic');
 
-  if (isAdminRoute && !user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
+  // Unauthenticated user hitting a protected route → login
+  if (isProtectedRoute && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 
+  // Authenticated user on login page → redirect to their home
   if (isLoginPage && user) {
-    const adminUrl = request.nextUrl.clone();
-    adminUrl.pathname = '/admin/employees';
-    return NextResponse.redirect(adminUrl);
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const home = ROLE_HOME[profile?.role ?? ''] ?? '/login';
+    const url = request.nextUrl.clone();
+    url.pathname = home;
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;
