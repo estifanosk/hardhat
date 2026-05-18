@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'admin') {
+  if (!['super_admin', 'safety_admin'].includes(profile?.role ?? '')) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500">You don&apos;t have admin access.</p>

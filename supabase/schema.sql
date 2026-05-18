@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT,
   full_name TEXT,
-  role TEXT NOT NULL DEFAULT 'viewer' CHECK (role IN ('admin', 'foreman', 'viewer')),
+  role TEXT NOT NULL DEFAULT 'viewer' CHECK (role IN ('super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer')),
+  site TEXT,
   company TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -20,7 +21,7 @@ CREATE OR REPLACE FUNCTION is_admin()
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() AND role = 'admin'
+    WHERE id = auth.uid() AND role IN ('super_admin', 'safety_admin')
   );
 $$ LANGUAGE sql SECURITY DEFINER SET search_path = public;
 
