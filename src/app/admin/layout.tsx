@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { logout } from '@/app/login/actions';
-import { HardHat, Users, Truck, LogOut, HelpCircle } from 'lucide-react';
+import { HardHat, Users, Truck, LogOut, HelpCircle, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -16,6 +16,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .select('role, full_name, email')
     .eq('id', user.id)
     .single();
+
+  const isSuperAdmin = profile?.role === 'super_admin';
 
   if (!['super_admin', 'safety_admin'].includes(profile?.role ?? '')) {
     return (
@@ -54,6 +56,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 <Truck className="h-4 w-4" />
                 Equipment
               </Link>
+              {isSuperAdmin && (
+                <Link
+                  href="/admin/users"
+                  className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  Users
+                </Link>
+              )}
               <Link
                 href="/help"
                 className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 font-medium"
