@@ -39,7 +39,8 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/admin') ||
     path.startsWith('/foreman') ||
     path.startsWith('/employee') ||
-    path.startsWith('/mechanic');
+    path.startsWith('/mechanic') ||
+    path.startsWith('/dashboard');
 
   // Unauthenticated user hitting a protected route → login
   if (isProtectedRoute && !user) {
