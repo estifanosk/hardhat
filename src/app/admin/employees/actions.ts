@@ -79,3 +79,16 @@ export async function deleteCertification(certId: string, employeeId: string) {
   await supabase.from('certifications').delete().eq('id', certId);
   revalidatePath(`/admin/employees/${employeeId}`);
 }
+
+export async function linkProfile(employeeId: string, formData: FormData) {
+  const supabase = await createClient();
+  const profileId = (formData.get('profile_id') as string) || null;
+
+  const { error } = await supabase
+    .from('employees')
+    .update({ profile_id: profileId })
+    .eq('id', employeeId);
+
+  if (error) redirect(`/admin/employees/${employeeId}?error=Failed+to+link+account`);
+  revalidatePath(`/admin/employees/${employeeId}`);
+}

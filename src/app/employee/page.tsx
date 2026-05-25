@@ -14,11 +14,10 @@ export default async function EmployeePage() {
     .eq('id', user!.id)
     .single();
 
-  // Look up this user's employee record by email
   const { data: employee } = await supabase
     .from('employees')
     .select('id, name, role, company, overall_status, qr_code')
-    .eq('qr_code', user!.id)
+    .eq('profile_id', user!.id)
     .maybeSingle();
 
   return (

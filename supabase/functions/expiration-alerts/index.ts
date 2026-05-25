@@ -17,8 +17,9 @@ const FROM_EMAIL = Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@hardhat.app';
 const APP_URL = Deno.env.get('APP_URL') ?? 'http://localhost:3000';
 
 type Profile = { email: string; full_name: string | null; role: string };
-type Cert = { name: string; expiry_date: string; status: string; employees: { name: string; company: string } | null };
+type Cert = { employee_id: string; name: string; expiry_date: string; status: string; employees: { name: string; company: string } | null };
 type Doc = { name: string; expiry_date: string; status: string; equipment: { name: string; identifier: string } | null };
+type LinkedEmployee = { id: string; name: string; profile_id: string };
 
 Deno.serve(async () => {
   const supabase = createClient(
@@ -35,7 +36,7 @@ Deno.serve(async () => {
   // Fetch all expiring/expired certs
   const { data: certs } = await supabase
     .from('certifications')
-    .select('name, expiry_date, status, employees(name, company)')
+    .select('employee_id, name, expiry_date, status, employees(name, company)')
     .in('status', ['expiring_soon', 'expired'])
     .lte('expiry_date', in30Str)
     .order('expiry_date') as { data: Cert[] | null };
@@ -100,6 +101,46 @@ Deno.serve(async () => {
     sentResults.push({ email: profile.email, role: profile.role, result });
   }
 
+  // Send self-alerts to employees with linked profiles
+  const { data: linkedEmployees } = await supabase
+    .from('employees')
+    .select('id, name, profile_id')
+    .not('profile_id', 'is', null) as { data: LinkedEmployee[] | null };
+
+  for (const emp of linkedEmployees ?? []) {
+    const empCerts = (certs ?? []).filter((c) => c.employee_id === emp.id);
+    if (empCerts.length === 0) continue;
+
+    const { data: empProfile } = await supabase
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', emp.profile_id)
+      .single() as { data: { email: string; full_name: string | null } | null };
+
+    if (!empProfile?.email) continue;
+
+    const html = buildEmail({
+      recipientName: empProfile.full_name ?? empProfile.email,
+      role: 'employee',
+      certs: empCerts,
+      docs: [],
+      today,
+      todayStr,
+      appUrl: APP_URL,
+      isAdmin: false,
+    });
+
+    const subject = `[HardHat] ${empCerts.length} of your certification${empCerts.length !== 1 ? 's' : ''} need${empCerts.length === 1 ? 's' : ''} attention`;
+
+    const result = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: FROM_EMAIL, to: empProfile.email, subject, html }),
+    }).then((r) => r.json());
+
+    sentResults.push({ email: empProfile.email, role: 'employee', result });
+  }
+
   return new Response(
     JSON.stringify({ sent: sentResults.length, cert_issues: certs?.length ?? 0, doc_issues: docs?.length ?? 0, results: sentResults }),
     { headers: { 'Content-Type': 'application/json' } }
@@ -142,8 +183,8 @@ function buildEmail({
     </tr>`;
   }).join('');
 
-  const roleLabel = role === 'foreman' ? 'Foreman' : 'Admin';
-  const ctaUrl = isAdmin ? `${appUrl}/admin/employees` : `${appUrl}/foreman/employees`;
+  const roleLabel = role === 'foreman' ? 'Foreman' : role === 'employee' ? 'Employee' : 'Admin';
+  const ctaUrl = isAdmin ? `${appUrl}/admin/employees` : role === 'employee' ? `${appUrl}/employee` : `${appUrl}/foreman/employees`;
 
   return `
     <div style="font-family:sans-serif;max-width:640px;margin:0 auto">
