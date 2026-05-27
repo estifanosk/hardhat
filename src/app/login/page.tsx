@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { HardHat, MailCheck } from 'lucide-react';
+import { isMagicLinkAuthEnabled } from '@/lib/auth/feature-flags';
+import { HardHat, MailCheck, ShieldAlert } from 'lucide-react';
 
 export default async function LoginPage({
   searchParams,
@@ -11,6 +12,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; sent?: string; email?: string }>;
 }) {
   const { error, sent, email } = await searchParams;
+  const magicLinkEnabled = isMagicLinkAuthEnabled();
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -28,7 +30,20 @@ export default async function LoginPage({
             <CardTitle className="text-base">Sign in</CardTitle>
           </CardHeader>
           <CardContent>
-            {sent ? (
+            {!magicLinkEnabled ? (
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <ShieldAlert className="h-10 w-10 text-orange-500" />
+                <p className="font-medium text-gray-900">Sign-in is temporarily disabled</p>
+                <p className="text-sm text-gray-500">
+                  Magic link access is turned off while we finish production authentication setup.
+                </p>
+                {error && (
+                  <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
+                    {error}
+                  </p>
+                )}
+              </div>
+            ) : sent ? (
               <div className="flex flex-col items-center gap-3 py-4 text-center">
                 <MailCheck className="h-10 w-10 text-green-500" />
                 <p className="font-medium text-gray-900">Check your email</p>

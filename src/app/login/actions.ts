@@ -3,8 +3,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { getSiteUrl } from '@/lib/auth/site-url';
+import { isMagicLinkAuthEnabled } from '@/lib/auth/feature-flags';
 
 export async function sendMagicLink(formData: FormData) {
+  if (!isMagicLinkAuthEnabled()) {
+    redirect('/login?error=Magic+link+sign-in+is+temporarily+disabled');
+  }
+
   const supabase = await createClient();
   const email = formData.get('email') as string;
   const siteUrl = await getSiteUrl();

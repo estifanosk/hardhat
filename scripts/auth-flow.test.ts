@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { NextRequest } from 'next/server';
 import { handleAuthCallback } from '../src/app/auth/callback/route';
+import { isMagicLinkAuthEnabled } from '../src/lib/auth/feature-flags';
 import { getRoleHome } from '../src/lib/auth/role-home';
 import { getSiteUrlFromHeaders } from '../src/lib/auth/site-url';
 
@@ -107,4 +108,26 @@ test('invalid callback links go back to login with an error', async () => {
 
   assert.equal(response.status, 307);
   assert.equal(response.headers.get('location'), 'https://hardhat-xi.vercel.app/login?error=Link+expired+or+invalid');
+});
+
+test('disables magic-link auth in production unless explicitly enabled', () => {
+  const originalNodeEnv = process.env.NODE_ENV;
+  const originalFlag = process.env.ENABLE_MAGIC_LINK_AUTH;
+
+  process.env.NODE_ENV = 'production';
+  delete process.env.ENABLE_MAGIC_LINK_AUTH;
+  assert.equal(isMagicLinkAuthEnabled(), false);
+
+  process.env.ENABLE_MAGIC_LINK_AUTH = 'true';
+  assert.equal(isMagicLinkAuthEnabled(), true);
+
+  process.env.ENABLE_MAGIC_LINK_AUTH = 'false';
+  assert.equal(isMagicLinkAuthEnabled(), false);
+
+  process.env.NODE_ENV = originalNodeEnv;
+  if (originalFlag === undefined) {
+    delete process.env.ENABLE_MAGIC_LINK_AUTH;
+  } else {
+    process.env.ENABLE_MAGIC_LINK_AUTH = originalFlag;
+  }
 });
