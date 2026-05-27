@@ -2,18 +2,17 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+import { getSiteUrl } from '@/lib/auth/site-url';
 
 export async function sendMagicLink(formData: FormData) {
   const supabase = await createClient();
   const email = formData.get('email') as string;
-  const headersList = await headers();
-  const origin = headersList.get('origin') ?? '';
+  const siteUrl = await getSiteUrl();
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   });
 

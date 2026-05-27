@@ -1,14 +1,6 @@
 import { createServerClient, type CookieOptionsWithName } from '@supabase/ssr';
+import { getRoleHome } from '@/lib/auth/role-home';
 import { NextResponse, type NextRequest } from 'next/server';
-
-const ROLE_HOME: Record<string, string> = {
-  super_admin: '/admin/employees',
-  safety_admin: '/admin/employees',
-  foreman: '/foreman',
-  employee: '/employee',
-  mechanic: '/mechanic',
-  viewer: '/dashboard',
-};
 
 type EmailOtpType = 'signup' | 'invite' | 'magiclink' | 'recovery' | 'email_change' | 'email';
 
@@ -79,6 +71,5 @@ export async function GET(request: NextRequest) {
     .eq('id', userId)
     .single();
 
-  const home = ROLE_HOME[profile?.role ?? ''] ?? '/dashboard';
-  return redirectWithAuthCookies(home);
+  return redirectWithAuthCookies(getRoleHome(profile?.role));
 }

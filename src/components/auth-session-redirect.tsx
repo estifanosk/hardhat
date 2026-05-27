@@ -1,17 +1,9 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
+import { getRoleHome } from '@/lib/auth/role-home';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-
-const ROLE_HOME: Record<string, string> = {
-  super_admin: '/admin/employees',
-  safety_admin: '/admin/employees',
-  foreman: '/foreman',
-  employee: '/employee',
-  mechanic: '/mechanic',
-  viewer: '/dashboard',
-};
 
 const PUBLIC_AUTH_PATHS = new Set(['/', '/login', '/auth/callback']);
 
@@ -35,8 +27,7 @@ export function AuthSessionRedirect() {
         .eq('id', user.id)
         .single();
 
-      const home = ROLE_HOME[profile?.role ?? ''] ?? '/dashboard';
-      router.replace(home);
+      router.replace(getRoleHome(profile?.role));
       router.refresh();
     }
 

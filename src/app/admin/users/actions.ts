@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+import { getSiteUrl } from '@/lib/auth/site-url';
 
 type Role = 'super_admin' | 'safety_admin' | 'foreman' | 'employee' | 'mechanic' | 'viewer';
 
@@ -27,13 +27,12 @@ export async function inviteUser(formData: FormData) {
   const email = formData.get('email') as string;
   const role = formData.get('role') as Role;
   const full_name = formData.get('full_name') as string;
-  const headersList = await headers();
-  const origin = headersList.get('origin') ?? '';
+  const siteUrl = await getSiteUrl();
 
   const admin = createAdminClient();
 
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${origin}/auth/callback`,
+    redirectTo: `${siteUrl}/auth/callback`,
     data: { full_name },
   });
 
