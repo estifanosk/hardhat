@@ -10,21 +10,41 @@ type ResponseCookie = {
   options: CookieOptionsWithName;
 };
 
+type AuthCallbackClient = {
+  auth: {
+    exchangeCodeForSession(code: string): Promise<{ data: { user: { id: string } | null }; error: { message: string } | null }>;
+    verifyOtp(params: { token_hash: string; type: EmailOtpType }): Promise<{ data: { user: { id: string } | null }; error: { message: string } | null }>;
+  };
+  from(table: string): {
+    select(columns: string): {
+      eq(column: string, value: string): {
+        single(): Promise<{ data: { role: string | null } | null }>;
+      };
+    };
+  };
+};
+
+type CreateAuthCallbackClient = (request: NextRequest, cookiesToSet: ResponseCookie[]) => AuthCallbackClient;
+
+const createSupabaseAuthCallbackClient = createServerClient as unknown as (
+  supabaseUrl: string,
+  supabaseKey: string,
+  options: {
+    cookies: {
+      getAll(): ReturnType<NextRequest['cookies']['getAll']>;
+      setAll(cookies: ResponseCookie[]): void;
+    };
+  }
+) => AuthCallbackClient;
+
 function getBaseUrl(request: NextRequest, origin: string): string {
   if (process.env.NODE_ENV === 'development') return origin;
   const forwardedHost = request.headers.get('x-forwarded-host');
   return forwardedHost ? `https://${forwardedHost}` : origin;
 }
 
-export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const token_hash = searchParams.get('token_hash');
-  const type = searchParams.get('type');
-  const base = getBaseUrl(request, origin);
-  const cookiesToSet: ResponseCookie[] = [];
-
-  const supabase = createServerClient(
+function createAuthCallbackClient(request: NextRequest, cookiesToSet: ResponseCookie[]): AuthCallbackClient {
+  return createSupabaseAuthCallbackClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -38,6 +58,18 @@ export async function GET(request: NextRequest) {
       },
     }
   );
+}
+
+export async function handleAuthCallback(
+  request: NextRequest,
+  createClientForRequest: CreateAuthCallbackClient = createAuthCallbackClient
+) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get('code');
+  const token_hash = searchParams.get('token_hash');
+  const type = searchParams.get('type');
+  const base = getBaseUrl(request, origin);
+  const cookiesToSet: ResponseCookie[] = [];
 
   function redirectWithAuthCookies(path: string) {
     const response = NextResponse.redirect(`${base}${path}`);
@@ -47,6 +79,11 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
+  if (!code && (!token_hash || !type)) {
+    return redirectWithAuthCookies('/login?error=Link+expired+or+invalid');
+  }
+
+  const supabase = createClientForRequest(request, cookiesToSet);
   let userId: string | null = null;
 
   if (code) {
@@ -61,7 +98,9 @@ export async function GET(request: NextRequest) {
       return redirectWithAuthCookies(`/login?error=${encodeURIComponent(error?.message ?? 'Link expired or invalid')}`);
     }
     userId = data.user.id;
-  } else {
+  }
+
+  if (!userId) {
     return redirectWithAuthCookies('/login?error=Link+expired+or+invalid');
   }
 
@@ -72,4 +111,8 @@ export async function GET(request: NextRequest) {
     .single();
 
   return redirectWithAuthCookies(getRoleHome(profile?.role));
+}
+
+export async function GET(request: NextRequest) {
+  return handleAuthCallback(request);
 }
