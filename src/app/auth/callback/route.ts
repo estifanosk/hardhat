@@ -24,23 +24,28 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const base = getBaseUrl(request, origin);
 
+  let userId: string | null = null;
+
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) return NextResponse.redirect(`${base}/login?error=Link+expired+or+invalid`);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error || !data.user) {
+      return NextResponse.redirect(`${base}/login?error=${encodeURIComponent(error?.message ?? 'Link expired or invalid')}`);
+    }
+    userId = data.user.id;
   } else if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as 'magiclink' | 'email' });
-    if (error) return NextResponse.redirect(`${base}/login?error=Link+expired+or+invalid`);
+    const { data, error } = await supabase.auth.verifyOtp({ token_hash, type: type as 'magiclink' | 'email' });
+    if (error || !data.user) {
+      return NextResponse.redirect(`${base}/login?error=${encodeURIComponent(error?.message ?? 'Link expired or invalid')}`);
+    }
+    userId = data.user.id;
   } else {
     return NextResponse.redirect(`${base}/login?error=Link+expired+or+invalid`);
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.redirect(`${base}/login`);
-
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
-    .eq('id', user.id)
+    .eq('id', userId)
     .single();
 
   const home = ROLE_HOME[profile?.role ?? ''] ?? '/login';
