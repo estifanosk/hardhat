@@ -1,13 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
+import { getRoleHome } from '@/lib/auth/role-home';
 import { NextResponse, type NextRequest } from 'next/server';
-
-const ROLE_HOME: Record<string, string> = {
-  super_admin: '/admin/employees',
-  safety_admin: '/admin/employees',
-  foreman: '/foreman',
-  employee: '/employee',
-  mechanic: '/mechanic',
-};
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -57,9 +50,8 @@ export async function middleware(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    const home = ROLE_HOME[profile?.role ?? ''] ?? '/login';
     const url = request.nextUrl.clone();
-    url.pathname = home;
+    url.pathname = getRoleHome(profile?.role);
     return NextResponse.redirect(url);
   }
 
