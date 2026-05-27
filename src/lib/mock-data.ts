@@ -71,18 +71,6 @@ export interface JHAForm {
   crewMembers: { id: string; name: string; signed: boolean; signedAt?: string }[];
 }
 
-// Helper to calculate status based on expiry date
-function getStatus(expiryDate: string | null): 'active' | 'expiring_soon' | 'expired' {
-  if (!expiryDate) return 'active';
-  const expiry = new Date(expiryDate);
-  const today = new Date();
-  const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (daysUntilExpiry < 0) return 'expired';
-  if (daysUntilExpiry <= 30) return 'expiring_soon';
-  return 'active';
-}
-
 // Mock Employees
 export const employees: Employee[] = [
   {

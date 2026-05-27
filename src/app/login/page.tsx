@@ -50,7 +50,7 @@ export default async function LoginPage({
                     autoComplete="email"
                   />
                   <p className="text-xs text-gray-400">
-                    We'll send a one-click sign-in link to your inbox.
+                    We&apos;ll send a one-click sign-in link to your inbox.
                   </p>
                 </div>
 

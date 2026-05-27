@@ -166,7 +166,7 @@ export default function HomePage() {
                 <div>
                   <h3 className="font-semibold text-lg text-gray-900">Employee QR Scan</h3>
                   <p className="text-gray-600 mt-1">
-                    Scan a worker's hard hat QR code to instantly see their
+                    Scan a worker&apos;s hard hat QR code to instantly see their
                     certifications, licenses, and task training status.
                   </p>
                 </div>

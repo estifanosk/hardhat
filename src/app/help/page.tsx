@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
 import {
   HardHat, CheckCircle2, AlertTriangle, XCircle, ArrowLeft,
-  Users, Truck, Shield, QrCode, ClipboardCheck, Bell, ChevronRight,
+  Users, Truck, Shield, Bell, ChevronRight,
 } from 'lucide-react';
 
 // ─── Mockups (replaced automatically once screenshots exist) ─────────────────
@@ -346,7 +345,7 @@ function AdminGuide() {
       <section id="getting-started" className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Getting Started</h3>
         <p className="text-sm text-gray-600">
-          Sign in at <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs">/login</span> with your email. You'll receive a magic link — no password needed. Once signed in, you land on your admin dashboard.
+          Sign in at <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs">/login</span> with your email. You&apos;ll receive a magic link — no password needed. Once signed in, you land on your admin dashboard.
         </p>
       </section>
 
@@ -361,7 +360,7 @@ function AdminGuide() {
               alt="Admin employee list"
               mockup={<EmployeeListMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">The employee list shows every worker's name, role, and overall compliance status at a glance.</p>
+            <p className="text-xs text-gray-500 mt-2">The employee list shows every worker&apos;s name, role, and overall compliance status at a glance.</p>
           </div>
 
           <div>
@@ -382,10 +381,10 @@ function AdminGuide() {
               mockup={<CertFormMockup />}
             />
             <div className="text-xs text-gray-600 mt-2 space-y-1">
-              <p>Open an employee's detail page and use the <strong>Add certification</strong> form. Choose the type:</p>
+              <p>Open an employee&apos;s detail page and use the <strong>Add certification</strong> form. Choose the type:</p>
               <ul className="ml-4 list-disc space-y-0.5">
                 <li><strong>Certification</strong> — e.g. OSHA 30-Hour, First Aid</li>
-                <li><strong>License</strong> — e.g. Crane Operator, Driver's License</li>
+                <li><strong>License</strong> — e.g. Crane Operator, Driver&apos;s License</li>
                 <li><strong>Task Training</strong> — e.g. Confined Space Entry, Fall Arrest</li>
               </ul>
               <p className="mt-1">Always enter an expiry date. Items expiring within 30 days are automatically flagged.</p>
@@ -399,7 +398,7 @@ function AdminGuide() {
               alt="QR code download"
               mockup={<QRMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">From the employee detail page, click <strong>Download QR PNG</strong>. Print and stick it on the worker's hard hat or ID badge.</p>
+            <p className="text-xs text-gray-500 mt-2">From the employee detail page, click <strong>Download QR PNG</strong>. Print and stick it on the worker&apos;s hard hat or ID badge.</p>
           </div>
         </div>
       </section>
@@ -451,7 +450,7 @@ function FieldGuide() {
               alt="Compliant employee scan result"
               mockup={<ScanResultMockup status="compliant" />}
             />
-            <p className="text-xs text-gray-500 mt-2">Open your phone camera, point at the QR on the hard hat, and tap the link. No login required. You'll see the worker's compliance status instantly.</p>
+            <p className="text-xs text-gray-500 mt-2">Open your phone camera, point at the QR on the hard hat, and tap the link. No login required. You&apos;ll see the worker&apos;s compliance status instantly.</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Expiring soon</p>

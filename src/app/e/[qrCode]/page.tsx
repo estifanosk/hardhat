@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, AlertTriangle, XCircle, Shield, Award, Wrench } from 'lucide-react';
 
 interface PageProps {
