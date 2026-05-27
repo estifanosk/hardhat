@@ -54,10 +54,10 @@ export default function HelpPage() {
                 </div>
                 <div>
                   <p className="font-medium text-gray-800 mb-1">2. Add certifications</p>
-                  <p>Open the employee's detail page and use the <strong>Add certification</strong> form. Choose the type:</p>
+                  <p>Open the employee&apos;s detail page and use the <strong>Add certification</strong> form. Choose the type:</p>
                   <ul className="mt-1 ml-4 space-y-1 list-disc">
                     <li><strong>Certification</strong> — e.g. OSHA 30-Hour, First Aid</li>
-                    <li><strong>License</strong> — e.g. Crane Operator License, Driver's License</li>
+                    <li><strong>License</strong> — e.g. Crane Operator License, Driver&apos;s License</li>
                     <li><strong>Task Training</strong> — e.g. Confined Space Entry, Fall Arrest</li>
                   </ul>
                 </div>
@@ -67,7 +67,7 @@ export default function HelpPage() {
                 </div>
                 <div>
                   <p className="font-medium text-gray-800 mb-1">4. Download and print QR codes</p>
-                  <p>From the employee detail page, click <strong>Download QR image</strong> to get a PNG file. Print and attach to the worker's hard hat or ID badge.</p>
+                  <p>From the employee detail page, click <strong>Download QR image</strong> to get a PNG file. Print and attach to the worker&apos;s hard hat or ID badge.</p>
                 </div>
               </CardContent>
             </Card>
@@ -112,12 +112,12 @@ export default function HelpPage() {
               <CardContent className="text-sm text-gray-600 space-y-3">
                 <div>
                   <p className="font-medium text-gray-800 mb-1">How to scan</p>
-                  <p>Open your phone's camera app and point it at the QR code on a worker's hard hat or ID badge. Tap the link that appears — no app install required.</p>
+                  <p>Open your phone&apos;s camera app and point it at the QR code on a worker&apos;s hard hat or ID badge. Tap the link that appears — no app install required.</p>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-800 mb-1">What you'll see</p>
+                  <p className="font-medium text-gray-800 mb-1">What you&apos;ll see</p>
                   <ul className="ml-4 space-y-1 list-disc">
-                    <li>Worker's name, role, and company</li>
+                    <li>Worker&apos;s name, role, and company</li>
                     <li>Overall compliance status (green / yellow / red)</li>
                     <li>List of certifications and licenses with expiry dates</li>
                     <li>Task training completed</li>
@@ -137,7 +137,7 @@ export default function HelpPage() {
               <CardContent className="text-sm text-gray-600 space-y-3">
                 <div>
                   <p className="font-medium text-gray-800 mb-1">How to scan</p>
-                  <p>Scan the QR code sticker on the equipment (dashboard, control panel, or body). The scan page shows the equipment's current status and document validity.</p>
+                  <p>Scan the QR code sticker on the equipment (dashboard, control panel, or body). The scan page shows the equipment&apos;s current status and document validity.</p>
                 </div>
                 <div>
                   <p className="font-medium text-gray-800 mb-1">Running a daily inspection</p>

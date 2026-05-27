@@ -5,8 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 
-const ROLES = ['super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer'] as const;
-type Role = typeof ROLES[number];
+type Role = 'super_admin' | 'safety_admin' | 'foreman' | 'employee' | 'mechanic' | 'viewer';
 
 async function requireSuperAdmin() {
   const supabase = await createClient();

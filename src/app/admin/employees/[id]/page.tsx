@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -73,8 +72,6 @@ export default async function EmployeeDetailPage({
     .select('id, full_name, email')
     .eq('role', 'employee')
     .order('full_name');
-
-  const qrUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ? '' : 'http://localhost:3000'}/e/${employee.qr_code}`;
 
   return (
     <div className="max-w-2xl space-y-6">

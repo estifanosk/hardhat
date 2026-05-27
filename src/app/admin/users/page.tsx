@@ -79,7 +79,7 @@ export default async function UsersPage({
 
       {invited && (
         <p className="text-sm text-green-700 bg-green-50 px-3 py-2 rounded-md border border-green-200">
-          Invite sent — they'll receive a sign-in link by email.
+          Invite sent — they&apos;ll receive a sign-in link by email.
         </p>
       )}
       {error && (

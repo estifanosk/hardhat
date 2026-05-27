@@ -4,14 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
   FileText,
   ClipboardCheck,
-  Clock,
   MapPin,
   Wrench,
   History,
@@ -128,6 +126,7 @@ export default async function EquipmentScanPage({ params }: PageProps) {
             {/* Equipment Image */}
             <div className="w-full h-40 rounded-lg overflow-hidden mb-4 bg-gray-200">
               {equip.photo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={equip.photo_url}
                   alt={equip.name}

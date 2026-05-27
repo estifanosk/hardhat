@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   Users,
   Truck,
@@ -21,6 +20,7 @@ import {
 export default async function DashboardPage() {
   const supabase = await createClient();
   const today = new Date().toISOString().split('T')[0];
+  const todayTime = new Date(today).getTime();
 
   const [
     { count: totalEmployees },
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
 
   const getDaysUntilExpiry = (dateStr: string | null) => {
     if (!dateStr) return null;
-    return Math.ceil((new Date(dateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return Math.ceil((new Date(dateStr).getTime() - todayTime) / (1000 * 60 * 60 * 24));
   };
 
   type ExpiringItem = {
