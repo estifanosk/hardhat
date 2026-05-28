@@ -1,8 +1,9 @@
-import { sendMagicLink } from './actions';
+import { sendMagicLink, signInWithPassword } from './actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { isMagicLinkAuthEnabled } from '@/lib/auth/feature-flags';
 import { HardHat, MailCheck } from 'lucide-react';
 
 export default async function LoginPage({
@@ -11,6 +12,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; sent?: string; email?: string }>;
 }) {
   const { error, sent, email } = await searchParams;
+  const magicLinkEnabled = isMagicLinkAuthEnabled();
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -28,7 +30,7 @@ export default async function LoginPage({
             <CardTitle className="text-base">Sign in</CardTitle>
           </CardHeader>
           <CardContent>
-            {sent ? (
+            {sent && magicLinkEnabled ? (
               <div className="flex flex-col items-center gap-3 py-4 text-center">
                 <MailCheck className="h-10 w-10 text-green-500" />
                 <p className="font-medium text-gray-900">Check your email</p>
@@ -38,32 +40,72 @@ export default async function LoginPage({
                 </p>
               </div>
             ) : (
-              <form action={sendMagicLink} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="you@company.com"
-                    required
-                    autoComplete="email"
-                  />
-                  <p className="text-xs text-gray-400">
-                    We&apos;ll send a one-click sign-in link to your inbox.
-                  </p>
-                </div>
+              <div className="space-y-5">
+                <form action={signInWithPassword} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="you@company.com"
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      required
+                      autoComplete="current-password"
+                    />
+                  </div>
 
-                {error && (
-                  <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
-                    {error}
-                  </p>
+                  {error && (
+                    <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
+                      {error}
+                    </p>
+                  )}
+
+                  <Button type="submit" className="w-full">
+                    Sign in
+                  </Button>
+                </form>
+
+                {magicLinkEnabled && (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1 bg-gray-200" />
+                      <span className="text-xs text-gray-400">or</span>
+                      <div className="h-px flex-1 bg-gray-200" />
+                    </div>
+
+                    <form action={sendMagicLink} className="space-y-3">
+                      <p className="text-xs text-gray-400 text-center">
+                        Magic link sign-in is enabled in this environment.
+                      </p>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="magic-email">Email</Label>
+                        <Input
+                          id="magic-email"
+                          name="email"
+                          type="email"
+                          placeholder="you@company.com"
+                          required
+                          autoComplete="email"
+                        />
+                      </div>
+                      <Button type="submit" variant="outline" className="w-full">
+                        Send sign-in link
+                      </Button>
+                    </form>
+                  </>
                 )}
-
-                <Button type="submit" className="w-full">
-                  Send sign-in link
-                </Button>
-              </form>
+              </div>
             )}
           </CardContent>
         </Card>
