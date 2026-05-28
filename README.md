@@ -52,7 +52,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 Run:
 
 ```bash
-npm run create-admin -- admin@example.com temporary-password "Admin Name"
+npm run create-admin -- --email admin@example.com --password temporary-password --name "Admin Name"
 ```
 
 This creates a confirmed Supabase Auth user and upserts their `profiles` row with `role = 'super_admin'`. Use the email and password from the command to sign in at `/login`.

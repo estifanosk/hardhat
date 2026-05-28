@@ -30,16 +30,33 @@ function loadLocalEnv() {
 
 loadLocalEnv();
 
-const [, , email, password, ...nameParts] = process.argv;
-const fullName = nameParts.join(' ').trim();
-
 function fail(message: string): never {
   console.error(`Error: ${message}`);
   process.exit(1);
 }
 
+function readFlag(name: string) {
+  const index = process.argv.indexOf(name);
+  if (index === -1) return null;
+
+  const value = process.argv[index + 1];
+  if (!value || value.startsWith('--')) {
+    fail(`Missing value for ${name}.`);
+  }
+
+  return value;
+}
+
+const email = readFlag('--email');
+const password = readFlag('--password');
+const fullName = readFlag('--name');
+
 if (!email || !password || !fullName) {
-  fail('Usage: npm run create-admin -- admin@example.com temporary-password "Full Name"');
+  fail('Usage: npm run create-admin -- --email admin@example.com --password temporary-password --name "Full Name"');
+}
+
+if (!email.includes('@')) {
+  fail('Email must look like an email address.');
 }
 
 if (password.length < 8) {
