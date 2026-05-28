@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
-import { inviteUser, updateUserRole, deactivateUser, reactivateUser } from './actions';
+import { createUser, updateUserPassword, updateUserRole, deactivateUser, reactivateUser } from './actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,7 +33,7 @@ const roleBadgeColor: Record<string, string> = {
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; invited?: string }>;
+  searchParams: Promise<{ error?: string; created?: string; password?: string }>;
 }) {
   // Only super_admin can access this page
   const supabase = await createClient();
@@ -56,7 +56,7 @@ export default async function UsersPage({
     .select('id, email, full_name, role, created_at')
     .order('created_at', { ascending: false });
 
-  const { error, invited } = await searchParams;
+  const { error, created, password } = await searchParams;
 
   // Merge profile data with ban status from auth
   const users = (profiles ?? []).map((profile) => {
@@ -77,9 +77,14 @@ export default async function UsersPage({
         </div>
       </div>
 
-      {invited && (
+      {created && (
         <p className="text-sm text-green-700 bg-green-50 px-3 py-2 rounded-md border border-green-200">
-          Invite sent — they&apos;ll receive a sign-in link by email.
+          User created. Share the password with them directly.
+        </p>
+      )}
+      {password && (
+        <p className="text-sm text-green-700 bg-green-50 px-3 py-2 rounded-md border border-green-200">
+          Password updated.
         </p>
       )}
       {error && (
@@ -91,11 +96,11 @@ export default async function UsersPage({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <UserPlus className="h-4 w-4" />
-            Invite a user
+            Create a user
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={inviteUser} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <form action={createUser} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Full name</Label>
               <Input name="full_name" placeholder="John Smith" className="h-8 text-sm" />
@@ -103,6 +108,18 @@ export default async function UsersPage({
             <div className="space-y-1.5">
               <Label className="text-xs">Email</Label>
               <Input name="email" type="email" placeholder="john@company.com" required className="h-8 text-sm" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Password</Label>
+              <Input
+                name="password"
+                type="password"
+                placeholder="Minimum 8 characters"
+                required
+                minLength={8}
+                className="h-8 text-sm"
+                autoComplete="new-password"
+              />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Role</Label>
@@ -116,10 +133,10 @@ export default async function UsersPage({
                 ))}
               </select>
             </div>
-            <div className="sm:col-span-3 flex justify-end pt-1">
+            <div className="sm:col-span-4 flex justify-end pt-1">
               <Button type="submit" size="sm" className="gap-1.5">
                 <UserPlus className="h-3.5 w-3.5" />
-                Send invite
+                Create user
               </Button>
             </div>
           </form>
@@ -139,6 +156,7 @@ export default async function UsersPage({
           <ul className="divide-y">
             {users.map((u) => {
               const updateRole = updateUserRole.bind(null, u.id);
+              const updatePassword = updateUserPassword.bind(null, u.id);
               const deactivate = deactivateUser.bind(null, u.id);
               const reactivate = reactivateUser.bind(null, u.id);
 
@@ -170,14 +188,30 @@ export default async function UsersPage({
 
                     {/* Role change — not for self */}
                     {u.id !== user.id && !u.banned && (
-                      <RoleSelectForm
-                        currentRole={u.role}
-                        action={async (formData) => {
-                          'use server';
-                          const role = formData.get('role') as string;
-                          await updateRole(role as Parameters<typeof updateUserRole>[1]);
-                        }}
-                      />
+                      <>
+                        <RoleSelectForm
+                          currentRole={u.role}
+                          action={async (formData) => {
+                            'use server';
+                            const role = formData.get('role') as string;
+                            await updateRole(role as Parameters<typeof updateUserRole>[1]);
+                          }}
+                        />
+                        <form action={updatePassword} className="flex items-center gap-1">
+                          <Input
+                            name="password"
+                            type="password"
+                            placeholder="New password"
+                            required
+                            minLength={8}
+                            className="h-8 w-32 text-xs"
+                            autoComplete="new-password"
+                          />
+                          <Button type="submit" variant="outline" size="sm" className="h-8 text-xs">
+                            Set
+                          </Button>
+                        </form>
+                      </>
                     )}
 
                     {/* Deactivate / reactivate — not for self */}

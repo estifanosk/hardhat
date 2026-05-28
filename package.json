@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:auth": "tsx --test scripts/auth-flow.test.ts",
     "db": "tsx scripts/db.ts",
     "prepare": "husky"
   },
