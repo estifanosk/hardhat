@@ -345,7 +345,7 @@ function AdminGuide() {
       <section id="getting-started" className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Getting Started</h3>
         <p className="text-sm text-gray-600">
-          Sign in at <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs">/login</span> with your email. You&apos;ll receive a magic link — no password needed. Once signed in, you land on your admin dashboard.
+          Sign in at <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs">/login</span> with your email and password. Once signed in, you land on your admin dashboard.
         </p>
       </section>
 
