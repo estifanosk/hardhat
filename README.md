@@ -38,6 +38,25 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Create the First Admin
+
+After the Supabase schema is set up, create the first `super_admin` from the CLI. This is a one-time bootstrap step; after that, the super admin can create users from **Admin → Users** in the app.
+
+The script reads Supabase credentials from `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+Run:
+
+```bash
+npm run create-admin -- admin@example.com temporary-password "Admin Name"
+```
+
+This creates a confirmed Supabase Auth user and upserts their `profiles` row with `role = 'super_admin'`. Use the email and password from the command to sign in at `/login`.
+
 ### Build for Production
 
 ```bash
