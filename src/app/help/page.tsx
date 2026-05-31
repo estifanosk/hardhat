@@ -8,9 +8,12 @@ import {
   Users, Truck, Shield, Bell, ChevronRight,
 } from 'lucide-react';
 
-// ─── Mockups (replaced automatically once screenshots exist) ─────────────────
+// ─── Mockups (shown as fallback when screenshot is missing) ──────────────────
 
 function ScreenShot({ src, alt, mockup }: { src: string; alt: string; mockup: React.ReactNode }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+
   return (
     <div className="rounded-xl overflow-hidden border shadow-md bg-white">
       <div className="bg-gray-100 px-3 py-1.5 flex items-center gap-1.5 border-b">
@@ -20,20 +23,19 @@ function ScreenShot({ src, alt, mockup }: { src: string; alt: string; mockup: Re
         <span className="ml-2 text-xs text-gray-400 font-mono truncate">hardhat-xi.vercel.app</span>
       </div>
       <div className="relative">
-        {/* Try to load the real screenshot; if missing the mockup shows */}
         <Image
           src={src}
           alt={alt}
           width={900}
           height={500}
-          className="w-full h-auto hidden [&[data-loaded]]:block"
-          onLoad={(e) => (e.currentTarget.dataset.loaded = 'true')}
-          onError={(e) => e.currentTarget.classList.add('!hidden')}
+          className={loaded ? 'w-full h-auto' : 'hidden'}
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
           unoptimized
         />
-        <div className="screenshot-fallback p-4">
-          {mockup}
-        </div>
+        {(!loaded || failed) && (
+          <div className="p-4">{mockup}</div>
+        )}
       </div>
     </div>
   );
@@ -197,6 +199,34 @@ function QRMockup() {
   );
 }
 
+function UserListMockup() {
+  const roles = [
+    { name: 'Jordan Safety', email: 'estifanos+safetyadmin@live.com', role: 'safety_admin', color: 'bg-blue-100 text-blue-700' },
+    { name: 'Carlos Mendez', email: 'estifanos+foreman1@live.com', role: 'foreman', color: 'bg-purple-100 text-purple-700' },
+    { name: 'Tony Reyes', email: 'estifanos+mechanic1@live.com', role: 'mechanic', color: 'bg-yellow-100 text-yellow-700' },
+    { name: 'James Carter', email: 'estifanos+emp001@live.com', role: 'employee', color: 'bg-gray-100 text-gray-700' },
+  ];
+  return (
+    <div className="space-y-3 text-sm">
+      <div className="flex items-center justify-between">
+        <p className="text-lg font-bold text-gray-900">User Management</p>
+        <span className="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-md">+ Add User</span>
+      </div>
+      <div className="border rounded-lg divide-y overflow-hidden">
+        {roles.map((u) => (
+          <div key={u.email} className="flex items-center justify-between px-4 py-3">
+            <div>
+              <p className="font-medium text-gray-900 text-sm">{u.name}</p>
+              <p className="text-xs text-gray-400">{u.email}</p>
+            </div>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.color}`}>{u.role}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ScanResultMockup({ status }: { status: 'compliant' | 'expiring_soon' | 'non_compliant' }) {
   const config = {
     compliant: { label: 'COMPLIANT', bg: 'bg-green-500', border: 'border-green-200', light: 'bg-green-50', icon: CheckCircle2, textColor: 'text-green-700' },
@@ -316,7 +346,7 @@ const sections = [
     id: 'admin',
     label: 'Admin Guide',
     icon: Users,
-    subsections: ['Getting Started', 'Managing Employees', 'Managing Equipment', 'Expiration Alerts'],
+    subsections: ['Getting Started', 'Managing Users', 'Managing Employees', 'Managing Equipment', 'Expiration Alerts'],
   },
   {
     id: 'field',
@@ -345,8 +375,43 @@ function AdminGuide() {
       <section id="getting-started" className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Getting Started</h3>
         <p className="text-sm text-gray-600">
-          Sign in at <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs">/login</span> with your email and password. Once signed in, you land on your admin dashboard.
+          Sign in at <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs">/login</span> with your email and password. Once signed in, you land on your admin dashboard showing total employees, equipment, and any expired or expiring items that need attention.
         </p>
+      </section>
+
+      <section id="managing-users" className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Managing Users</h3>
+        <div className="space-y-6">
+          <div>
+            <ScreenShot
+              src="/screenshots/admin-users.png"
+              alt="User management list"
+              mockup={<UserListMockup />}
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Open <strong>Users</strong> in the top navigation. Only super admins can access this page.
+            </p>
+          </div>
+          <div className="text-sm text-gray-600 space-y-3">
+            <p>Click <strong>Add User</strong> to create a new team member. Fill in their full name, email address, a temporary password, and their role.</p>
+            <p className="font-medium text-gray-800">Roles and what they can do:</p>
+            <div className="space-y-2">
+              {[
+                { role: 'Super Admin', color: 'bg-orange-100 text-orange-700', desc: 'Full access — manages users, employees, equipment, and all compliance records.' },
+                { role: 'Safety Admin', color: 'bg-blue-100 text-blue-700', desc: 'Manages employee certifications and equipment documents. Cannot manage user accounts.' },
+                { role: 'Foreman', color: 'bg-purple-100 text-purple-700', desc: 'Reviews crew compliance and equipment status in the field.' },
+                { role: 'Mechanic', color: 'bg-yellow-100 text-yellow-700', desc: 'Manages equipment readiness, adds documents, and runs inspections.' },
+                { role: 'Employee', color: 'bg-gray-100 text-gray-700', desc: 'Can log in to view their own certifications and compliance status.' },
+              ].map(({ role, color, desc }) => (
+                <div key={role} className="flex items-start gap-3">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 mt-0.5 ${color}`}>{role}</span>
+                  <p className="text-xs text-gray-600">{desc}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 pt-1">If a user forgets their password, they can use the <strong>Forgot password</strong> link on the sign-in page, or a super admin can reset it from the user list.</p>
+          </div>
+        </div>
       </section>
 
       <section id="managing-employees" className="space-y-4">
@@ -360,7 +425,7 @@ function AdminGuide() {
               alt="Admin employee list"
               mockup={<EmployeeListMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">The employee list shows every worker&apos;s name, role, and overall compliance status at a glance.</p>
+            <p className="text-xs text-gray-500 mt-2">The employee list shows every worker&apos;s name, job title, company, and compliance status. Summary cards at the top show how many workers are Compliant, Expiring Soon, and Non-Compliant.</p>
           </div>
 
           <div>
@@ -370,7 +435,7 @@ function AdminGuide() {
               alt="Add employee form"
               mockup={<AddEmployeeMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">Go to <strong>Employees → Add Employee</strong>. Enter their full name, job title, and company. A unique QR code is generated automatically.</p>
+            <p className="text-xs text-gray-500 mt-2">Go to <strong>Employees → Add Employee</strong>. Enter the full name as it appears on their ID, their job title / role, and the company they belong to. A unique QR code is generated automatically — you can add certifications immediately after.</p>
           </div>
 
           <div>
@@ -381,13 +446,13 @@ function AdminGuide() {
               mockup={<CertFormMockup />}
             />
             <div className="text-xs text-gray-600 mt-2 space-y-1">
-              <p>Open an employee&apos;s detail page and use the <strong>Add certification</strong> form. Choose the type:</p>
+              <p>Open an employee&apos;s detail page and scroll to <strong>Certifications &amp; Licenses</strong>. Use the Add certification form. Choose the type:</p>
               <ul className="ml-4 list-disc space-y-0.5">
-                <li><strong>Certification</strong> — e.g. OSHA 30-Hour, First Aid</li>
-                <li><strong>License</strong> — e.g. Crane Operator, Driver&apos;s License</li>
-                <li><strong>Task Training</strong> — e.g. Confined Space Entry, Fall Arrest</li>
+                <li><strong>Certification</strong> — e.g. OSHA 30-Hour, First Aid/CPR</li>
+                <li><strong>License</strong> — e.g. Crane Operator License (NCCCO), Forklift Operator</li>
+                <li><strong>Task Training</strong> — e.g. Lock Out/Tag Out, Fire Watch. Leave expiry blank if there is no expiry date.</li>
               </ul>
-              <p className="mt-1">Always enter an expiry date. Items expiring within 30 days are automatically flagged.</p>
+              <p className="mt-1">HardHat auto-computes the status from the expiry date. Items expiring within 30 days are automatically flagged as <em>Expiring Soon</em>.</p>
             </div>
           </div>
 
@@ -398,7 +463,7 @@ function AdminGuide() {
               alt="QR code download"
               mockup={<QRMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">From the employee detail page, click <strong>Download QR PNG</strong>. Print and stick it on the worker&apos;s hard hat or ID badge.</p>
+            <p className="text-xs text-gray-500 mt-2">From the employee detail page, find the <strong>QR Code</strong> section. Click <strong>Preview scan page</strong> to see what a field scan looks like, or <strong>Download QR image</strong> to get a printable PNG. Attach it to the worker&apos;s hard hat or ID badge.</p>
           </div>
         </div>
       </section>
@@ -413,7 +478,7 @@ function AdminGuide() {
               alt="Equipment list"
               mockup={<EquipmentListMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">Go to <strong>Equipment → Add Equipment</strong>. Enter the name, type, unit ID, and job site. Then add documents (registration, insurance, inspection) with expiry dates.</p>
+            <p className="text-xs text-gray-500 mt-2">The equipment list shows every machine with its unit ID, job site, and current status. Summary cards at the top show how many items are Ready, Needs Inspection, and Out of Service. Click <strong>Add Equipment</strong> to register a new machine — enter the name, type, unit ID, and job site. You can add documents (registration, insurance, annual inspection) immediately after.</p>
           </div>
         </div>
       </section>
@@ -450,7 +515,7 @@ function FieldGuide() {
               alt="Compliant employee scan result"
               mockup={<ScanResultMockup status="compliant" />}
             />
-            <p className="text-xs text-gray-500 mt-2">Open your phone camera, point at the QR on the hard hat, and tap the link. No login required. You&apos;ll see the worker&apos;s compliance status instantly.</p>
+            <p className="text-xs text-gray-500 mt-2">Open your phone camera, point at the QR code on the worker&apos;s hard hat or ID badge, and tap the link. No login required. You&apos;ll see the worker&apos;s name, job title, company, and compliance status instantly. Certifications and licenses are listed below with their expiry dates. Task training items appear separately as chips.</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Expiring soon</p>
@@ -459,7 +524,7 @@ function FieldGuide() {
               alt="Expiring employee scan result"
               mockup={<ScanResultMockup status="expiring_soon" />}
             />
-            <p className="text-xs text-gray-500 mt-2">Yellow means one or more certifications expire within 30 days. The worker can still be on site, but action is needed soon.</p>
+            <p className="text-xs text-gray-500 mt-2">Yellow means one or more certifications expire within 30 days. The worker can still be on site, but an admin needs to arrange renewal soon.</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Non-compliant (expired)</p>
@@ -468,14 +533,21 @@ function FieldGuide() {
               alt="Non-compliant employee scan result"
               mockup={<ScanResultMockup status="non_compliant" />}
             />
-            <p className="text-xs text-gray-500 mt-2">Red means a certification has expired. The worker should not be on site until the issue is resolved by an admin.</p>
+            <p className="text-xs text-gray-500 mt-2">Red means a certification has expired. Each expired item shows how long ago it expired. The worker should not be on site until an admin resolves the issue.</p>
           </div>
         </div>
       </section>
 
       <section id="scanning-equipment-qr" className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Scanning Equipment QR Codes</h3>
-        <p className="text-sm text-gray-600">Scan the QR sticker on the equipment (dashboard, control panel, or body). The page shows current document status — same green/yellow/red system as employees.</p>
+        <div className="space-y-4">
+          <ScreenShot
+            src="/screenshots/scan-equipment.png"
+            alt="Equipment QR scan result"
+            mockup={<EquipmentListMockup />}
+          />
+          <p className="text-sm text-gray-600">Scan the QR sticker on the equipment — typically on the dashboard, control panel, or body. The page shows the machine name, unit ID, job site, and a status banner using the same green/yellow/red system as employees. Each document is listed with its expiry date. The last inspection result is also shown, including any notes left by the inspector. Use the <strong>Start Daily Checklist</strong> button to run a pre-use inspection directly from this page.</p>
+        </div>
       </section>
 
       <section id="running-inspections" className="space-y-4">
@@ -487,7 +559,7 @@ function FieldGuide() {
             alt="Equipment inspection checklist"
             mockup={<InspectionMockup />}
           />
-          <p className="text-xs text-gray-500 mt-2">From the equipment scan page, tap <strong>Run Inspection</strong>. Complete the checklist, add any notes, and submit. The inspection is logged and the equipment status updates immediately.</p>
+          <p className="text-xs text-gray-500 mt-2">From the equipment scan page, tap <strong>Start Daily Checklist</strong>. Enter your name, then work through the Pre-Use Checklist — tap the checkmark if an item passes or the X if it fails. Required items are marked with a red asterisk. Add notes for anything that needs attention, and optionally attach photos of damage. Tap <strong>Submit Inspection</strong> when done. The result is logged immediately and visible to anyone who scans the equipment QR code.</p>
         </div>
       </section>
 
