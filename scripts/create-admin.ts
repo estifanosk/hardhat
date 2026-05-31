@@ -30,16 +30,33 @@ function loadLocalEnv() {
 
 loadLocalEnv();
 
-const [, , email, password, ...nameParts] = process.argv;
-const fullName = nameParts.join(' ').trim();
-
 function fail(message: string): never {
   console.error(`Error: ${message}`);
   process.exit(1);
 }
 
+function readFlag(name: string) {
+  const index = process.argv.indexOf(name);
+  if (index === -1) return null;
+
+  const value = process.argv[index + 1];
+  if (!value || value.startsWith('--')) {
+    fail(`Missing value for ${name}.`);
+  }
+
+  return value;
+}
+
+const email = readFlag('--email')?.toLowerCase();
+const password = readFlag('--password');
+const fullName = readFlag('--name');
+
 if (!email || !password || !fullName) {
-  fail('Usage: npm run create-admin -- admin@example.com temporary-password "Full Name"');
+  fail('Usage: npm run create-admin -- --email admin@example.com --password temporary-password --name "Full Name"');
+}
+
+if (!email.includes('@')) {
+  fail('Email must look like an email address.');
 }
 
 if (password.length < 8) {
@@ -64,7 +81,60 @@ const admin = createClient(supabaseUrl, serviceRoleKey, {
   },
 });
 
+async function findUserByEmail(targetEmail: string) {
+  const perPage = 1000;
+
+  for (let page = 1; page < 100; page += 1) {
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+
+    if (error) {
+      fail(error.message);
+    }
+
+    const user = data.users.find((candidate) => candidate.email?.toLowerCase() === targetEmail);
+    if (user) return user;
+
+    if (data.users.length < perPage) return null;
+  }
+
+  fail('Could not scan all Supabase users. Too many pages.');
+}
+
+async function upsertSuperAdminProfile(userId: string) {
+  const { error: profileError } = await admin.from('profiles').upsert({
+    id: userId,
+    email,
+    full_name: fullName,
+    role: 'super_admin',
+  });
+
+  if (profileError) {
+    fail(profileError.message);
+  }
+}
+
 async function main() {
+  const existingUser = await findUserByEmail(email);
+
+  if (existingUser) {
+    const { error } = await admin.auth.admin.updateUserById(existingUser.id, {
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: fullName },
+    });
+
+    if (error) {
+      fail(error.message);
+    }
+
+    await upsertSuperAdminProfile(existingUser.id);
+    console.log(`Updated existing super admin: ${email}`);
+    return;
+  }
+
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password,
@@ -80,17 +150,7 @@ async function main() {
     fail('Supabase did not return a created user.');
   }
 
-  const { error: profileError } = await admin.from('profiles').upsert({
-    id: data.user.id,
-    email,
-    full_name: fullName,
-    role: 'super_admin',
-  });
-
-  if (profileError) {
-    fail(profileError.message);
-  }
-
+  await upsertSuperAdminProfile(data.user.id);
   console.log(`Created super admin: ${email}`);
 }
 
