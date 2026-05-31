@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { logout } from '@/app/login/actions';
 import { HardHat, LogOut } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export default async function EmployeeLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +22,7 @@ export default async function EmployeeLayout({ children }: { children: React.Rea
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="bg-orange-500 p-1.5 rounded-lg">
               <HardHat className="h-5 w-5 text-white" />
             </div>
@@ -29,7 +30,7 @@ export default async function EmployeeLayout({ children }: { children: React.Rea
             <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
               Employee
             </span>
-          </div>
+          </Link>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500 hidden sm:block">
               {profile?.full_name || profile?.email}

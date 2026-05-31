@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/admin/employees" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <div className="bg-orange-500 p-1.5 rounded-lg">
                 <HardHat className="h-5 w-5 text-white" />
               </div>
