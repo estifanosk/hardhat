@@ -629,7 +629,7 @@ function FieldGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Expiring soon</p>
             <ScreenShot
-              src="/screenshots/scan-employee-expiring.png"
+              src="/screenshots/scan-employee-expiring-soon.png"
               alt="Expiring employee scan result"
               mockup={<ScanResultMockup status="expiring_soon" />}
             />
@@ -638,7 +638,7 @@ function FieldGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Non-compliant (expired)</p>
             <ScreenShot
-              src="/screenshots/scan-employee-expired.png"
+              src="/screenshots/scan-employee-non-compliant.png"
               alt="Non-compliant employee scan result"
               mockup={<ScanResultMockup status="non_compliant" />}
             />
@@ -649,13 +649,35 @@ function FieldGuide() {
 
       <section id="scanning-equipment-qr" className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Scanning Equipment QR Codes</h3>
-        <div className="space-y-4">
-          <ScreenShot
-            src="/screenshots/scan-equipment.png"
-            alt="Equipment QR scan result"
-            mockup={<EquipmentListMockup />}
-          />
-          <p className="text-sm text-gray-600">Scan the QR sticker on the equipment — typically on the dashboard, control panel, or body. The page shows the machine name, unit ID, job site, and a status banner using the same green/yellow/red system as employees. Each document is listed with its expiry date. The last inspection result is also shown, including any notes left by the inspector. Use the <strong>Start Daily Checklist</strong> button to run a pre-use inspection directly from this page.</p>
+        <p className="text-sm text-gray-600">Scan the QR sticker on the equipment — typically on the dashboard, control panel, or body. The page shows the machine name, unit ID, job site, and a status banner using the same green/yellow/red system as employees. Each document is listed with its expiry date. The last inspection result is also shown, including any notes left by the inspector. Use the <strong>Start Daily Checklist</strong> button to run a pre-use inspection directly from this page.</p>
+        <div className="space-y-6">
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Ready for operation</p>
+            <ScreenShot
+              src="/screenshots/scan-equipment-ready.png"
+              alt="Equipment ready scan result"
+              mockup={<EquipmentListMockup />}
+            />
+            <p className="text-xs text-gray-500 mt-2">Green means all documents (registration, insurance, inspection) are current and the equipment is cleared for use.</p>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Needs inspection</p>
+            <ScreenShot
+              src="/screenshots/scan-equipment-needs-inspection.png"
+              alt="Equipment needs inspection scan result"
+              mockup={<EquipmentListMockup />}
+            />
+            <p className="text-xs text-gray-500 mt-2">Yellow means one or more documents are expiring soon. The equipment can still be operated, but an admin needs to arrange renewal.</p>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Out of service</p>
+            <ScreenShot
+              src="/screenshots/scan-equipment-out-of-service.png"
+              alt="Equipment out of service scan result"
+              mockup={<EquipmentListMockup />}
+            />
+            <p className="text-xs text-gray-500 mt-2">Red means a document has expired or an inspection has failed. Do not operate the equipment until an admin resolves the issue.</p>
+          </div>
         </div>
       </section>
 
