@@ -199,6 +199,71 @@ function QRMockup() {
   );
 }
 
+function AddEquipmentMockup() {
+  return (
+    <div className="space-y-3 text-sm max-w-md">
+      <p className="text-lg font-bold text-gray-900">Add Equipment</p>
+      <div className="space-y-3">
+        {[
+          { label: 'Name', placeholder: 'CAT 320 Excavator', hint: 'Make and model' },
+          { label: 'Unit ID', placeholder: 'EQ-042', hint: 'Your internal unit number or serial number' },
+          { label: 'Job site', placeholder: 'Downtown Tower Project', hint: 'Current site where this equipment is deployed' },
+        ].map((f) => (
+          <div key={f.label}>
+            <p className="text-xs font-medium text-gray-700 mb-1">{f.label}</p>
+            <div className="border rounded-md px-3 py-2 text-xs text-gray-400 bg-gray-50">{f.placeholder}</div>
+            <p className="text-xs text-gray-400 mt-0.5">{f.hint}</p>
+          </div>
+        ))}
+        <div>
+          <p className="text-xs font-medium text-gray-700 mb-1">Type</p>
+          <div className="border rounded-md px-3 py-2 text-xs text-gray-500 bg-white flex justify-between">
+            <span>Select type...</span><span>▾</span>
+          </div>
+        </div>
+        <div className="pt-1">
+          <span className="bg-gray-900 text-white text-xs px-4 py-2 rounded-md inline-block">Create equipment</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EquipmentDetailMockup() {
+  return (
+    <div className="space-y-3 text-sm">
+      <div className="flex items-center gap-2">
+        <p className="font-bold text-gray-900">Atlas Copco ROC D7 Drill Rig</p>
+        <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">Needs Inspection</span>
+      </div>
+      <div className="border rounded-lg p-3 space-y-2">
+        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Status Override</p>
+        <div className="flex gap-2">
+          {['Ready', 'Needs Inspection', 'Out of Service'].map((s) => (
+            <span key={s} className={`text-xs px-2 py-1 rounded border ${s === 'Needs Inspection' ? 'bg-gray-900 text-white border-gray-900' : 'text-gray-500 border-gray-200'}`}>{s}</span>
+          ))}
+        </div>
+      </div>
+      <div className="border rounded-lg divide-y overflow-hidden">
+        <div className="bg-gray-50 px-3 py-2 text-xs font-medium text-gray-700">Documents (3)</div>
+        {[
+          { name: 'Registration', expiry: 'Expires 7/3/2027', status: 'active', color: 'bg-green-100 text-green-700' },
+          { name: 'Insurance', expiry: 'Expires 6/27/2026', status: 'expiring soon', color: 'bg-yellow-100 text-yellow-700' },
+          { name: 'Annual Inspection', expiry: 'Expires 11/25/2027', status: 'active', color: 'bg-green-100 text-green-700' },
+        ].map((d) => (
+          <div key={d.name} className="flex items-center justify-between px-3 py-2">
+            <div>
+              <p className="text-xs font-medium text-gray-800">{d.name}</p>
+              <p className="text-xs text-gray-400">{d.expiry}</p>
+            </div>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${d.color}`}>{d.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function UserListMockup() {
   const roles = [
     { name: 'Jordan Safety', email: 'estifanos+safetyadmin@live.com', role: 'safety_admin', color: 'bg-blue-100 text-blue-700' },
@@ -339,6 +404,21 @@ function InspectionMockup() {
   );
 }
 
+// ─── Nav helpers ─────────────────────────────────────────────────────────────
+
+function labelToId(label: string): string {
+  const overrides: Record<string, string> = {
+    'Adding Equipment': 'adding-equipment',
+    'Editing Equipment': 'editing-equipment',
+  };
+  return overrides[label] ?? label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+function scrollTo(label: string) {
+  const el = document.getElementById(labelToId(label));
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 // ─── Nav items ───────────────────────────────────────────────────────────────
 
 const sections = [
@@ -346,7 +426,7 @@ const sections = [
     id: 'admin',
     label: 'Admin Guide',
     icon: Users,
-    subsections: ['Getting Started', 'Managing Users', 'Managing Employees', 'Managing Equipment', 'Expiration Alerts'],
+    subsections: ['Getting Started', 'Managing Users', 'Managing Employees', 'Managing Equipment', 'Adding Equipment', 'Editing Equipment', 'Expiration Alerts'],
   },
   {
     id: 'field',
@@ -471,14 +551,43 @@ function AdminGuide() {
       <section id="managing-equipment" className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Managing Equipment</h3>
         <div className="space-y-6">
-          <div>
-            <p className="text-sm font-semibold text-gray-800 mb-3">The equipment list</p>
+          <div id="equipment-list">
+            <p className="text-sm font-semibold text-gray-800 mb-3">1. The equipment list</p>
             <ScreenShot
               src="/screenshots/admin-equipment.png"
               alt="Equipment list"
               mockup={<EquipmentListMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">The equipment list shows every machine with its unit ID, job site, and current status. Summary cards at the top show how many items are Ready, Needs Inspection, and Out of Service. Click <strong>Add Equipment</strong> to register a new machine — enter the name, type, unit ID, and job site. You can add documents (registration, insurance, annual inspection) immediately after.</p>
+            <p className="text-xs text-gray-500 mt-2">The equipment list shows every machine with its unit ID, job site, and current status. Summary cards at the top show how many items are Ready, Needs Inspection, and Out of Service.</p>
+          </div>
+
+          <div id="adding-equipment">
+            <p className="text-sm font-semibold text-gray-800 mb-3">2. Adding new equipment</p>
+            <ScreenShot
+              src="/screenshots/admin-add-equipment.png"
+              alt="Add equipment form"
+              mockup={<AddEquipmentMockup />}
+            />
+            <p className="text-xs text-gray-500 mt-2">Click <strong>Add Equipment</strong> and fill in the name (make and model), type, unit ID (your internal number or serial), and the current job site. Click <strong>Create equipment</strong> — a QR code is generated automatically. You can add documents and run inspections immediately after.</p>
+          </div>
+
+          <div id="editing-equipment">
+            <p className="text-sm font-semibold text-gray-800 mb-3">3. Editing equipment &amp; adding documents</p>
+            <ScreenShot
+              src="/screenshots/admin-equipment-detail.png"
+              alt="Equipment detail page"
+              mockup={<EquipmentDetailMockup />}
+            />
+            <div className="text-xs text-gray-600 mt-2 space-y-1.5">
+              <p>Open any piece of equipment to manage it. The detail page has several sections:</p>
+              <ul className="ml-4 list-disc space-y-1">
+                <li><strong>Equipment details</strong> — edit the name, type, unit ID, and job site, then click Save changes.</li>
+                <li><strong>Status override</strong> — HardHat auto-computes status from document expiry dates. Use the override buttons to manually set a machine Out of Service (e.g. due to mechanical failure) even if all documents are current.</li>
+                <li><strong>QR Code</strong> — preview or download the QR image to attach to the machine&apos;s dashboard, control panel, or body.</li>
+                <li><strong>Documents</strong> — lists registration, insurance, inspection certificates, and any other documents with their expiry dates and status badges. Use the <strong>Add document</strong> form to attach new ones.</li>
+                <li><strong>Last Inspection</strong> — shows the most recent inspection result and any notes left by the inspector.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -689,7 +798,13 @@ export default function HelpPage() {
                   {isActive && (
                     <div className="ml-4 mt-1 space-y-0.5 border-l border-orange-100 pl-3">
                       {section.subsections.map((sub) => (
-                        <p key={sub} className="text-xs text-gray-400 py-0.5">{sub}</p>
+                        <button
+                          key={sub}
+                          onClick={() => scrollTo(sub)}
+                          className="block w-full text-left text-xs text-gray-400 py-0.5 hover:text-orange-600 transition-colors"
+                        >
+                          {sub}
+                        </button>
                       ))}
                     </div>
                   )}
