@@ -9,6 +9,8 @@
     "lint": "eslint",
     "db": "tsx scripts/db.ts",
     "create-admin": "tsx scripts/create-admin.ts",
+    "seed-users": "tsx scripts/seed-users.ts",
+    "seed-data": "tsx scripts/seed-data.ts",
     "prepare": "husky"
   },
   "dependencies": {
