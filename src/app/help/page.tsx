@@ -465,7 +465,7 @@ function AdminGuide() {
         <div className="space-y-6">
           <div>
             <ScreenShot
-              src="/screenshots/admin-users.png"
+              src="/screenshots/admin-users.png?v=20260531-users-pagination"
               alt="User management list"
               mockup={<UserListMockup />}
             />
@@ -502,7 +502,7 @@ function AdminGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">1. The employee list</p>
             <ScreenShot
-              src="/screenshots/admin-employees.png"
+              src="/screenshots/admin-employees.png?v=20260531-list-pagination"
               alt="Admin employee list"
               mockup={<EmployeeListMockup />}
             />
@@ -555,7 +555,7 @@ function AdminGuide() {
           <div id="equipment-list">
             <p className="text-sm font-semibold text-gray-800 mb-3">1. The equipment list</p>
             <ScreenShot
-              src="/screenshots/admin-equipment.png"
+              src="/screenshots/admin-equipment.png?v=20260531-list-pagination"
               alt="Equipment list"
               mockup={<EquipmentListMockup />}
             />
