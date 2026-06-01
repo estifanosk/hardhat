@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, UserCheck, AlertTriangle, XCircle, ChevronRight } from 'lucide-react';
+import { Plus, UserCheck, AlertTriangle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE = 10;
 
 const statusConfig = {
   compliant: { label: 'Compliant', icon: UserCheck, className: 'bg-green-100 text-green-700' },
@@ -14,22 +16,44 @@ const statusConfig = {
 export default async function EmployeesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; page?: string }>;
 }) {
   const supabase = await createClient();
-  const { error: paramError } = await searchParams;
+  const { error: paramError, page: pageParam } = await searchParams;
+  const requestedPage = Number.parseInt(pageParam ?? '1', 10);
+  const parsedPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+
+  const [
+    { count: totalCount },
+    { count: compliantCount },
+    { count: expiringCount },
+    { count: nonCompliantCount },
+  ] = await Promise.all([
+    supabase.from('employees').select('id', { count: 'exact', head: true }),
+    supabase.from('employees').select('id', { count: 'exact', head: true }).eq('overall_status', 'compliant'),
+    supabase.from('employees').select('id', { count: 'exact', head: true }).eq('overall_status', 'expiring_soon'),
+    supabase.from('employees').select('id', { count: 'exact', head: true }).eq('overall_status', 'non_compliant'),
+  ]);
+
+  const counts = {
+    total: totalCount ?? 0,
+    compliant: compliantCount ?? 0,
+    expiring: expiringCount ?? 0,
+    nonCompliant: nonCompliantCount ?? 0,
+  };
+  const totalPages = Math.max(1, Math.ceil(counts.total / PAGE_SIZE));
+  const currentPage = Math.min(parsedPage, totalPages);
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  const pageStart = counts.total === 0 ? 0 : from + 1;
+  const pageEnd = Math.min(to + 1, counts.total);
+  const makePageHref = (page: number) => `/admin/employees?page=${page}`;
 
   const { data: employees } = await supabase
     .from('employees')
     .select('id, name, role, company, qr_code, overall_status, certifications(count)')
-    .order('name');
-
-  const counts = {
-    total: employees?.length ?? 0,
-    compliant: employees?.filter((e) => e.overall_status === 'compliant').length ?? 0,
-    expiring: employees?.filter((e) => e.overall_status === 'expiring_soon').length ?? 0,
-    nonCompliant: employees?.filter((e) => e.overall_status === 'non_compliant').length ?? 0,
-  };
+    .order('name')
+    .range(from, to);
 
   return (
     <div className="space-y-6">
@@ -120,6 +144,45 @@ export default async function EmployeesPage({
           )}
         </CardContent>
       </Card>
+
+      {counts.total > PAGE_SIZE && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-gray-500">
+            Showing {pageStart}-{pageEnd} of {counts.total}
+          </p>
+          <div className="flex items-center gap-2">
+            {currentPage > 1 ? (
+              <Link href={makePageHref(currentPage - 1)}>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="outline" size="sm" className="gap-1" disabled>
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+            )}
+            <span className="min-w-20 text-center text-sm text-gray-600">
+              Page {Math.min(currentPage, totalPages)} of {totalPages}
+            </span>
+            {currentPage < totalPages ? (
+              <Link href={makePageHref(currentPage + 1)}>
+                <Button variant="outline" size="sm" className="gap-1">
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="outline" size="sm" className="gap-1" disabled>
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
