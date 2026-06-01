@@ -124,16 +124,16 @@ export default async function EquipmentScanPage({ params }: PageProps) {
         <Card>
           <CardContent className="pt-6">
             {/* Equipment Image */}
-            <div className="w-full h-40 rounded-lg overflow-hidden mb-4 bg-gray-200">
-              {equip.photo_url && (
-                // eslint-disable-next-line @next/next/no-img-element
+            {equip.photo_url && (
+              <div className="w-full h-40 rounded-lg overflow-hidden mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={equip.photo_url}
                   alt={equip.name}
                   className="w-full h-full object-cover"
                 />
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="space-y-1">
               <h1 className="text-xl font-bold text-gray-900">{equip.name}</h1>
