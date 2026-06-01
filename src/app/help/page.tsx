@@ -470,7 +470,7 @@ function AdminGuide() {
               mockup={<UserListMockup />}
             />
             <p className="text-xs text-gray-500 mt-2">
-              Open <strong>Users</strong> in the top navigation. Only super admins can access this page.
+              Open <strong>Users</strong> in the top navigation. Only super admins can access this page. Larger teams are split into pages so role changes and password resets stay easy to scan.
             </p>
           </div>
           <div className="text-sm text-gray-600 space-y-3">
