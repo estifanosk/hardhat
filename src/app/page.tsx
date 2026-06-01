@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -290,13 +291,31 @@ export default function HomePage() {
           {/* What you see */}
           <div className="mb-16">
             <h3 className="text-xl font-bold text-gray-900 text-center mb-8">What You See After Scanning</h3>
-            <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div className="grid md:grid-cols-2 gap-10 items-start justify-items-center">
               <div className="space-y-4">
-                <PhoneMockup />
+                <div className="w-56 mx-auto">
+                  <Image
+                    src="/screenshots/14-scan-employee-compliant.png"
+                    alt="Employee compliance profile"
+                    width={860}
+                    height={1200}
+                    className="w-full h-auto rounded-2xl shadow-xl border"
+                    unoptimized
+                  />
+                </div>
                 <p className="text-center text-sm text-gray-500">Employee compliance profile</p>
               </div>
               <div className="space-y-4">
-                <EquipmentPhoneMockup />
+                <div className="w-56 mx-auto">
+                  <Image
+                    src="/screenshots/17-scan-equipment-ready.png"
+                    alt="Equipment document status"
+                    width={860}
+                    height={1200}
+                    className="w-full h-auto rounded-2xl shadow-xl border"
+                    unoptimized
+                  />
+                </div>
                 <p className="text-center text-sm text-gray-500">Equipment document status</p>
               </div>
             </div>
