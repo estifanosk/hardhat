@@ -32,6 +32,7 @@ function ScreenShot({ src, alt, mockup }: { src: string; alt: string; mockup: Re
           onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
           unoptimized
+          loading="eager"
         />
         {(!loaded || failed) && (
           <div className="p-4">{mockup}</div>
