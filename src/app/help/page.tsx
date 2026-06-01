@@ -616,67 +616,68 @@ function FieldGuide() {
 
       <section id="scanning-employee-qr" className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Scanning Employee QR Codes</h3>
+        <p className="text-sm text-gray-600">Open your phone camera, point it at the QR code on the worker&apos;s hard hat or ID badge, and tap the link that appears. No login required. You&apos;ll see the worker&apos;s name, job title, company, and a status banner. Below that, each certification and license is listed with its type (Cert or License), expiry date, and a green or red icon showing whether it&apos;s current.</p>
         <div className="space-y-6">
           <div>
-            <p className="text-sm font-semibold text-gray-800 mb-3">What a compliant worker looks like</p>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Compliant — cleared for site</p>
             <ScreenShot
               src="/screenshots/scan-employee-compliant.png"
               alt="Compliant employee scan result"
               mockup={<ScanResultMockup status="compliant" />}
             />
-            <p className="text-xs text-gray-500 mt-2">Open your phone camera, point at the QR code on the worker&apos;s hard hat or ID badge, and tap the link. No login required. You&apos;ll see the worker&apos;s name, job title, company, and compliance status instantly. Certifications and licenses are listed below with their expiry dates. Task training items appear separately as chips.</p>
+            <p className="text-xs text-gray-500 mt-2">A green <strong>COMPLIANT</strong> banner means all certifications and licenses are valid. Every item in the Certifications &amp; Licenses list shows a green checkmark with a future expiry date. The worker is cleared to be on site.</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800 mb-3">Expiring soon</p>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Expiring soon — action required</p>
             <ScreenShot
               src="/screenshots/scan-employee-expiring-soon.png"
-              alt="Expiring employee scan result"
+              alt="Expiring soon employee scan result"
               mockup={<ScanResultMockup status="expiring_soon" />}
             />
-            <p className="text-xs text-gray-500 mt-2">Yellow means one or more certifications expire within 30 days. The worker can still be on site, but an admin needs to arrange renewal soon.</p>
+            <p className="text-xs text-gray-500 mt-2">A yellow <strong>EXPIRING SOON</strong> banner means one or more certifications are close to their expiry date. The affected item shows a warning icon and displays how many days remain. The worker can still be on site, but an admin must arrange renewal before the expiry date.</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800 mb-3">Non-compliant (expired)</p>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Non-compliant — do not allow on site</p>
             <ScreenShot
               src="/screenshots/scan-employee-non-compliant.png"
               alt="Non-compliant employee scan result"
               mockup={<ScanResultMockup status="non_compliant" />}
             />
-            <p className="text-xs text-gray-500 mt-2">Red means a certification has expired. Each expired item shows how long ago it expired. The worker should not be on site until an admin resolves the issue.</p>
+            <p className="text-xs text-gray-500 mt-2">A red <strong>NON-COMPLIANT</strong> banner means at least one certification or license has expired. The expired item shows a red X icon and displays how many days ago it expired. Other valid items still show a green checkmark. The worker must not be on site — contact your admin immediately to resolve the issue before allowing access.</p>
           </div>
         </div>
       </section>
 
       <section id="scanning-equipment-qr" className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Scanning Equipment QR Codes</h3>
-        <p className="text-sm text-gray-600">Scan the QR sticker on the equipment — typically on the dashboard, control panel, or body. The page shows the machine name, unit ID, job site, and a status banner using the same green/yellow/red system as employees. Each document is listed with its expiry date. The last inspection result is also shown, including any notes left by the inspector. Use the <strong>Start Daily Checklist</strong> button to run a pre-use inspection directly from this page.</p>
+        <p className="text-sm text-gray-600">Scan the QR sticker on the equipment — typically on the dashboard, control panel, or body. The page shows the machine name, unit ID, equipment type, and job site location. A status banner appears below the header using the same colour system as employees. The <strong>Documents</strong> section lists each document (registration, insurance, annual inspection) with its expiry date and a status icon. The <strong>Last Inspection</strong> section shows the most recent inspection result, date, inspector name, and any notes. Use the <strong>Start Daily Checklist</strong> button to run a pre-use inspection, or <strong>View Inspection History</strong> to see past results.</p>
         <div className="space-y-6">
           <div>
-            <p className="text-sm font-semibold text-gray-800 mb-3">Ready for operation</p>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Ready — cleared for operation</p>
             <ScreenShot
               src="/screenshots/scan-equipment-ready.png"
               alt="Equipment ready scan result"
               mockup={<EquipmentListMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">Green means all documents (registration, insurance, inspection) are current and the equipment is cleared for use.</p>
+            <p className="text-xs text-gray-500 mt-2">A green <strong>READY</strong> banner means all documents are current and the last inspection passed. Every document in the list shows a green checkmark with a valid expiry date. The equipment is safe to operate.</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800 mb-3">Needs inspection</p>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Needs inspection — check before use</p>
             <ScreenShot
               src="/screenshots/scan-equipment-needs-inspection.png"
               alt="Equipment needs inspection scan result"
               mockup={<EquipmentListMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">Yellow means one or more documents are expiring soon. The equipment can still be operated, but an admin needs to arrange renewal.</p>
+            <p className="text-xs text-gray-500 mt-2">A yellow <strong>NEEDS INSPECTION</strong> banner means one or more documents are expiring soon. The affected document shows a warning icon next to its expiry date. The equipment can still be operated, but an admin must renew the document before it expires.</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800 mb-3">Out of service</p>
+            <p className="text-sm font-semibold text-gray-800 mb-3">Out of service — do not operate</p>
             <ScreenShot
               src="/screenshots/scan-equipment-out-of-service.png"
               alt="Equipment out of service scan result"
               mockup={<EquipmentListMockup />}
             />
-            <p className="text-xs text-gray-500 mt-2">Red means a document has expired or an inspection has failed. Do not operate the equipment until an admin resolves the issue.</p>
+            <p className="text-xs text-gray-500 mt-2">A red <strong>OUT OF SERVICE</strong> banner means a document has expired or the last inspection failed. The expired document shows a red X icon. If the inspection failed, the Last Inspection section shows a red <strong>Failed</strong> result along with any notes left by the inspector (e.g. damage description). Do not operate the equipment — contact your admin immediately.</p>
           </div>
         </div>
       </section>
