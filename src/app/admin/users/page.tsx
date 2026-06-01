@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createUser, updateUserPassword, updateUserRole, deactivateUser, reactivateUser } from './actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus, Shield } from 'lucide-react';
+import { ChevronLeft, ChevronRight, UserPlus, Shield } from 'lucide-react';
 import { RoleSelectForm } from './RoleSelectForm';
+
+const PAGE_SIZE = 10;
 
 const ROLES = ['super_admin', 'safety_admin', 'foreman', 'employee', 'mechanic', 'viewer'] as const;
 
@@ -33,7 +36,7 @@ const roleBadgeColor: Record<string, string> = {
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; created?: string; password?: string }>;
+  searchParams: Promise<{ error?: string; created?: string; password?: string; page?: string }>;
 }) {
   // Only super_admin can access this page
   const supabase = await createClient();
@@ -48,15 +51,31 @@ export default async function UsersPage({
 
   if (currentProfile?.role !== 'super_admin') redirect('/admin/employees');
 
+  const { error, created, password, page: pageParam } = await searchParams;
+  const requestedPage = Number.parseInt(pageParam ?? '1', 10);
+  const parsedPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+
   // Fetch all profiles + ban status from auth
   const admin = createAdminClient();
+  const { count: totalCount } = await admin
+    .from('profiles')
+    .select('id', { count: 'exact', head: true });
+
+  const totalUsers = totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalUsers / PAGE_SIZE));
+  const currentPage = Math.min(parsedPage, totalPages);
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  const pageStart = totalUsers === 0 ? 0 : from + 1;
+  const pageEnd = Math.min(to + 1, totalUsers);
+  const makePageHref = (page: number) => `/admin/users?page=${page}`;
+
   const { data: authUsers } = await admin.auth.admin.listUsers();
   const { data: profiles } = await admin
     .from('profiles')
     .select('id, email, full_name, role, created_at')
-    .order('created_at', { ascending: false });
-
-  const { error, created, password } = await searchParams;
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
   // Merge profile data with ban status from auth
   const users = (profiles ?? []).map((profile) => {
@@ -149,7 +168,7 @@ export default async function UsersPage({
           <CardTitle className="text-base flex items-center gap-2">
             <Shield className="h-4 w-4" />
             Team members
-            <span className="text-sm font-normal text-gray-400">({users.length})</span>
+            <span className="text-sm font-normal text-gray-400">({totalUsers})</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -237,6 +256,45 @@ export default async function UsersPage({
           </ul>
         </CardContent>
       </Card>
+
+      {totalUsers > PAGE_SIZE && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-gray-500">
+            Showing {pageStart}-{pageEnd} of {totalUsers}
+          </p>
+          <div className="flex items-center gap-2">
+            {currentPage > 1 ? (
+              <Link href={makePageHref(currentPage - 1)}>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="outline" size="sm" className="gap-1" disabled>
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+            )}
+            <span className="min-w-20 text-center text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            {currentPage < totalPages ? (
+              <Link href={makePageHref(currentPage + 1)}>
+                <Button variant="outline" size="sm" className="gap-1">
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="outline" size="sm" className="gap-1" disabled>
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
