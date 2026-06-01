@@ -621,7 +621,7 @@ function FieldGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Compliant — cleared for site</p>
             <ScreenShot
-              src="/screenshots/scan-employee-compliant.png"
+              src="/screenshots/14-scan-employee-compliant.png"
               alt="Compliant employee scan result"
               mockup={<ScanResultMockup status="compliant" />}
             />
@@ -630,7 +630,7 @@ function FieldGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Expiring soon — action required</p>
             <ScreenShot
-              src="/screenshots/scan-employee-expiring-soon.png"
+              src="/screenshots/15-scan-employee-expiring-soon.png"
               alt="Expiring soon employee scan result"
               mockup={<ScanResultMockup status="expiring_soon" />}
             />
@@ -639,7 +639,7 @@ function FieldGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Non-compliant — do not allow on site</p>
             <ScreenShot
-              src="/screenshots/scan-employee-non-compliant.png"
+              src="/screenshots/16-scan-employee-non-compliant.png"
               alt="Non-compliant employee scan result"
               mockup={<ScanResultMockup status="non_compliant" />}
             />
@@ -655,7 +655,7 @@ function FieldGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Ready — cleared for operation</p>
             <ScreenShot
-              src="/screenshots/scan-equipment-ready.png"
+              src="/screenshots/17-scan-equipment-ready.png"
               alt="Equipment ready scan result"
               mockup={<EquipmentListMockup />}
             />
@@ -664,7 +664,7 @@ function FieldGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Needs inspection — check before use</p>
             <ScreenShot
-              src="/screenshots/scan-equipment-needs-inspection.png"
+              src="/screenshots/18-scan-equipment-needs-inspection.png"
               alt="Equipment needs inspection scan result"
               mockup={<EquipmentListMockup />}
             />
@@ -673,7 +673,7 @@ function FieldGuide() {
           <div>
             <p className="text-sm font-semibold text-gray-800 mb-3">Out of service — do not operate</p>
             <ScreenShot
-              src="/screenshots/scan-equipment-out-of-service.png"
+              src="/screenshots/19-scan-equipment-out-of-service.png"
               alt="Equipment out of service scan result"
               mockup={<EquipmentListMockup />}
             />
